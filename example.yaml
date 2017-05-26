@@ -1,0 +1,23 @@
+component: testcomponent
+alauda_component: mycomponent
+servers:
+    http:
+      type: http
+      port: 80
+      host: 0.0.0.0
+datasources:
+   mysql:
+      host: 0.0.0.0
+      name: database
+   redis:
+      host: 0.0.0.0
+      port: 8080
+   statsd:
+      host: 0.0.0.0
+      port: 8080
+routes:
+   test: /test
+     name: test
+     handler: github.com/alauda/test/TestHandler
+controllers:
+    - name: sss
