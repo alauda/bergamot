@@ -1,8 +1,6 @@
 package http
 
 import (
-	"encoding/json"
-
 	"github.com/alauda/bergamot/errors"
 	"github.com/alauda/bergamot/log"
 
@@ -71,11 +69,12 @@ func NewAlaudaError(err ...error) *AlaudaError {
 	}
 }
 
-func evalError(err error) error {
-	by, _ := json.Marshal(err)
-	str := string(by)
-	if str == "" || str == "{}" {
-		return errors.NewCommon(err)
-	}
-	return err
-}
+// some issue with this function for now
+// func evalError(source string, err error) error {
+// 	by, _ := json.Marshal(err)
+// 	str := string(by)
+// 	if str == "" || str == "{}" {
+// 		return errors.NewCommon(source, err)
+// 	}
+// 	return err
+// }
