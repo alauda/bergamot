@@ -35,7 +35,7 @@ add:
 all: build
 
 build:
-	go build -ldflags "-w -s" -v -o $(ALAUDACI_DEST_DIR)/bin/begamot github.com/alauda/bergamot
+	go build -ldflags "-w -s" -v -o bergamot github.com/alauda/bergamot
 
 help:
 	@$(ECHO) "Targets:"
