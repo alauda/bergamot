@@ -80,6 +80,25 @@ func (h *HealthReport) Add(report ComponentReport) {
 	h.Details = append(h.Details, report)
 }
 
+// SimpleCheck simplified health check function for components where
+// if the function returns an error it should be able to distinguish
+// the health status of the component
+type SimpleCheck func() error
+
+// SimpleDiagnose Simple diagnose chack based on a check function that returns an error
+func SimpleDiagnose(componentName string, check SimpleCheck) ComponentReport {
+	var (
+		err   error
+		start time.Time
+	)
+	report := NewReport(componentName)
+	start = time.Now()
+	err = check()
+	report.Check(err, "OK", "Check configuration")
+	report.AddLatency(start)
+	return *report
+}
+
 // ComponentReport each component report
 type ComponentReport struct {
 	Status     HealthStatus  `json:"status"`
