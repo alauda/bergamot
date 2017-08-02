@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"bitbucket.org/mathildetech/mekansm"
+	"github.com/alauda/bergamot/errors"
 	"github.com/alauda/bergamot/metrics"
 )
 
@@ -42,7 +42,7 @@ func (mw BaseMetrics) getStatus(err error) int {
 		// OK
 		return 200
 	}
-	if al, ok := err.(*mekansm.AlaudaError); ok {
+	if al, ok := err.(*errors.AlaudaError); ok {
 		return al.StatusCode
 	}
 	// Unknown issue
@@ -53,7 +53,8 @@ func (mw BaseMetrics) getTag(key, value string) string {
 	return fmt.Sprintf("%s:%s", key, value)
 }
 
-func (mw BaseMetrics) generateMetrics(begin time.Time, module, method, action string, err error) {
+// GenerateMetrics API to automatically generate metrics for a given endpoint
+func (mw BaseMetrics) GenerateMetrics(begin time.Time, module, method, action string, err error) {
 	// converting difference to milliseconds
 	milliseconds := time.Since(begin).Seconds() * 1e3
 
