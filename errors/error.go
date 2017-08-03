@@ -38,6 +38,8 @@ const (
 	ErrorCodeUnauthorized = "unauthorized"
 	// ErrorCodeNotFound when is not found
 	ErrorCodeNotFound = "not_found"
+	// ErrorCodeElasticSearchError when using a elastic search and it returned an error
+	ErrorCodeElasticSearchError = "elasticsearch_error"
 )
 
 var (
@@ -51,6 +53,7 @@ var (
 		ErrorCodePermissionDenied:      NewErrorStatusMessage("Current user has no permission to perform the action.", 403),
 		ErrorCodeResourceStateConflict: NewErrorStatusMessage("The posted resource already existed.", 409),
 		ErrorCodeNotImplemented:        NewErrorStatusMessage("Method not implemented", 501),
+		ErrorCodeElasticSearchError:    NewErrorStatusMessage("Elastic search error.", 400),
 	}
 )
 
@@ -111,6 +114,23 @@ func (h *AlaudaError) Error() string {
 // returns itself
 func (h *AlaudaError) SetMessage(format string, args ...interface{}) *AlaudaError {
 	h.Message = fmt.Sprintf(format, args...)
+	return h
+}
+
+// SetCodeString sets a code as a string for custom codes
+func (h *AlaudaError) SetCodeString(code string) *AlaudaError {
+	return h.SetCode(Code(code))
+}
+
+// SetCode sets a code and returns itself for chaining calls
+func (h *AlaudaError) SetCode(code Code) *AlaudaError {
+	h.Code = code
+	return h
+}
+
+// SetSource sets the source and returns itself for chaining calls
+func (h *AlaudaError) SetSource(source string) *AlaudaError {
+	h.Source = source
 	return h
 }
 
