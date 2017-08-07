@@ -40,6 +40,8 @@ const (
 	ErrorCodeNotFound = "not_found"
 	// ErrorCodeElasticSearchError when using a elastic search and it returned an error
 	ErrorCodeElasticSearchError = "elasticsearch_error"
+	// ErrorCodeDatabaseError when using database commands and it returned an error
+	ErrorCodeDatabaseError = "database_error"
 )
 
 var (
@@ -53,7 +55,8 @@ var (
 		ErrorCodePermissionDenied:      NewErrorStatusMessage("Current user has no permission to perform the action.", 403),
 		ErrorCodeResourceStateConflict: NewErrorStatusMessage("The posted resource already existed.", 409),
 		ErrorCodeNotImplemented:        NewErrorStatusMessage("Method not implemented", 501),
-		ErrorCodeElasticSearchError:    NewErrorStatusMessage("Elastic search error.", 400),
+		ErrorCodeElasticSearchError:    NewErrorStatusMessage("Elastic search error.", 500),
+		ErrorCodeDatabaseError:         NewErrorStatusMessage("Database error.", 500),
 	}
 )
 
