@@ -541,6 +541,18 @@
 			"revisionTime": "2017-03-16T00:29:49Z"
 		},
 		{
+			"checksumSHA1": "NH/LganZdIuWt3c7WtC4i7Meyo0=",
+			"path": "gopkg.in/doug-martin/goqu.v4/adapters/mysql",
+			"revision": "1255ecd7f858d8d57ec151c5d367259c0b3c6d90",
+			"revisionTime": "2017-03-16T00:29:49Z"
+		},
+		{
+			"checksumSHA1": "YGvBaaZPgcGQiaDzczpuTahwnfM=",
+			"path": "gopkg.in/doug-martin/goqu.v4/adapters/postgres",
+			"revision": "1255ecd7f858d8d57ec151c5d367259c0b3c6d90",
+			"revisionTime": "2017-03-16T00:29:49Z"
+		},
+		{
 			"checksumSHA1": "81G7tO8wVbgCpnq3+wjt2tUza64=",
 			"path": "gopkg.in/kataras/iris.v6",
 			"revision": "76696083c3857ea2afbf21171fb580cf60828177",
@@ -557,6 +569,24 @@
 			"path": "gopkg.in/kataras/iris.v6/adaptors/httprouter",
 			"revision": "76696083c3857ea2afbf21171fb580cf60828177",
 			"revisionTime": "2017-05-18T01:56:54Z"
+		},
+		{
+			"checksumSHA1": "zoNLwFuvZ5OPzUu1FwDApA/hesw=",
+			"path": "gopkg.in/olivere/elastic.v3",
+			"revision": "5a75b7d18bca7420e68338600e8c9f611435f911",
+			"revisionTime": "2017-06-16T12:19:52Z"
+		},
+		{
+			"checksumSHA1": "lLdKOn9RPtFoTtPUNq5+sIInAiE=",
+			"path": "gopkg.in/olivere/elastic.v3/backoff",
+			"revision": "5a75b7d18bca7420e68338600e8c9f611435f911",
+			"revisionTime": "2017-06-16T12:19:52Z"
+		},
+		{
+			"checksumSHA1": "XQg6xG6l15Ke43KolthYYnVDCYo=",
+			"path": "gopkg.in/olivere/elastic.v3/uritemplates",
+			"revision": "5a75b7d18bca7420e68338600e8c9f611435f911",
+			"revisionTime": "2017-06-16T12:19:52Z"
 		},
 		{
 			"checksumSHA1": "OU/wHTJqhyQfyRnXMVWx1Ox06kQ=",

@@ -9,6 +9,8 @@ import (
 	"github.com/alauda/bergamot/diagnose"
 
 	goqu "gopkg.in/doug-martin/goqu.v4"
+	_ "gopkg.in/doug-martin/goqu.v4/adapters/mysql"
+	_ "gopkg.in/doug-martin/goqu.v4/adapters/postgres"
 )
 
 // Engine database engine
