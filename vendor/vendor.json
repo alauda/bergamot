@@ -3,12 +3,6 @@
 	"ignore": "test",
 	"package": [
 		{
-			"checksumSHA1": "WcV4iopmuCgvMT9Ea0cJ6JPxcok=",
-			"path": "bitbucket.org/mathildetech/alauda-redis-client",
-			"revision": "d3c44e7c01d84181086f68c0cca3817c73d75557",
-			"revisionTime": "2017-04-06T06:08:54Z"
-		},
-		{
 			"checksumSHA1": "zrPHh9J5EEQxYrrqQ2soZbWJzH0=",
 			"path": "bitbucket.org/mathildetech/mekansm",
 			"revision": "c573a2271e603e9af4406e49b9ee1a05f949cc24",
@@ -26,6 +20,12 @@
 			"path": "github.com/DataDog/datadog-go/statsd",
 			"revision": "4bf1c1105b95d4abdfec7f2added80203dce2482",
 			"revisionTime": "2017-05-09T17:40:47Z"
+		},
+		{
+			"checksumSHA1": "aBLtgH55tc1gH14RY+iqacKx9XI=",
+			"path": "github.com/alauda/go-redis-client",
+			"revision": "f611fdbf437780d011f955cfcbd05838531393af",
+			"revisionTime": "2017-07-31T06:10:19Z"
 		},
 		{
 			"checksumSHA1": "ZQifjwDVyDeyrHCUdIhh4gOotEE=",

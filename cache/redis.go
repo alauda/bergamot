@@ -6,7 +6,7 @@ import (
 
 	"github.com/alauda/bergamot/diagnose"
 
-	aredis "bitbucket.org/mathildetech/alauda-redis-client"
+	aredis "github.com/alauda/go-redis-client"
 )
 
 type (

@@ -1,4 +1,4 @@
-package alaudaRedisClient
+package redisClient
 
 import (
 	"crypto/tls"

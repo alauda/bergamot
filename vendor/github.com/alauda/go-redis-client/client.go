@@ -1,9 +1,8 @@
-package alaudaRedisClient
+package redisClient
 
 import (
 	"errors"
 	"fmt"
-	"sync"
 	"time"
 
 	"gopkg.in/redis.v5"
@@ -12,7 +11,6 @@ import (
 // RedisClient a struct representing the redis client
 type RedisClient struct {
 	opts      *RedisClientOptions
-	boot      sync.Once
 	client    Client
 	fmtString string
 }
@@ -39,6 +37,7 @@ func (r *RedisClient) k(key string) string {
 	return fmt.Sprintf(r.fmtString, key)
 }
 
+// Formats and returns a set of keys using the prefix
 func (r *RedisClient) ks(key ...string) []string {
 	keys := make([]string, len(key))
 	for i, k := range key {
@@ -100,6 +99,7 @@ func (r *RedisClient) Persist(key string) *redis.BoolCmd {
 	return r.client.Persist(r.k(key))
 }
 
+// PExpire redis command
 func (r *RedisClient) PExpire(key string, expiration time.Duration) *redis.BoolCmd {
 	return r.client.PExpire(r.k(key), expiration)
 }
@@ -439,7 +439,8 @@ func (r *RedisClient) Subscribe(channels ...string) (*redis.PubSub, error) {
 	if ok {
 		return client.Subscribe(r.ks(channels...)...)
 	}
-	return nil, NotImplementedError
+	return nil, ErrNotImplemented
 }
 
-var NotImplementedError = errors.New("Cluster client does not implement subscribe")
+// ErrNotImplemented not implemented error
+var ErrNotImplemented = errors.New("Not implemented")
