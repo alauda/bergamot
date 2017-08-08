@@ -170,7 +170,7 @@ func (logger Logger) generateStructured(message string, fields Fields) (format s
 	args[index] = message
 	index++
 
-	buf.WriteString("%s")
+	buf.WriteString("\"%s\"")
 	for k, v := range fields {
 		buf.WriteString("\t%s")
 		args[index] = k
@@ -178,7 +178,7 @@ func (logger Logger) generateStructured(message string, fields Fields) (format s
 
 		buf.WriteString("=")
 
-		buf.WriteString("%s")
+		buf.WriteString("%v")
 		args[index] = v
 		index++
 	}
