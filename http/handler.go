@@ -1,15 +1,51 @@
 package http
 
 import (
+	"context"
+
 	"github.com/alauda/bergamot/errors"
 	"github.com/alauda/bergamot/log"
 
 	iris "gopkg.in/kataras/iris.v6"
 )
 
+const (
+	// USER constant key for user in iris.Context
+	USER = "USER"
+)
+
+// ContextUserKey user key
+type ContextUserKey struct{}
+
+// ContextParamsKey params key
+type ContextParamsKey struct{}
+
+// ContextPathKey path key
+type ContextPathKey struct{}
+
+var (
+	// UserKey static key for UserObject in context
+	UserKey ContextUserKey
+	// ParamsKey static key for Query parameters in request
+	ParamsKey ContextParamsKey
+	// PathKey path string key for context
+	PathKey ContextPathKey
+)
+
 // Handler base handler with common shared methods
 // can be composed to provide default behaviour
 type Handler struct {
+}
+
+// GetContext get context with predefined keys
+func (Handler) GetContext(ctx *iris.Context) context.Context {
+	// string
+	c := context.WithValue(nil, PathKey, ctx.Path())
+	// map[string]string
+	c = context.WithValue(c, ParamsKey, ctx.URLParams())
+	// user
+	c = context.WithValue(c, UserKey, ctx.Get(USER))
+	return c
 }
 
 // HandleError Function to handle errors and return a message
