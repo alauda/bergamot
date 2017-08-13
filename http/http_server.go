@@ -16,6 +16,11 @@ type Router interface {
 	AddRoutes(router *iris.Router)
 }
 
+// Middleware adding middleware
+type Middleware interface {
+	Serve(ctx *iris.Context)
+}
+
 // Config configuration for the HTTP server
 type Config struct {
 	Host           string
@@ -27,20 +32,22 @@ type Config struct {
 
 // Server Full HTTP server
 type Server struct {
-	config   Config
-	start    time.Time
-	log      log.Logger
-	iris     *iris.Framework
-	versions map[int]*iris.Router
+	config      Config
+	start       time.Time
+	log         log.Logger
+	iris        *iris.Framework
+	versions    map[int]*iris.Router
+	middlewares map[string][]Middleware
 }
 
 // NewServer constructor function for the HTTP server
 func NewServer(config Config, log log.Logger) *Server {
 	return &Server{
-		config:   config,
-		log:      log,
-		iris:     iris.New(),
-		versions: map[int]*iris.Router{},
+		config:      config,
+		log:         log,
+		iris:        iris.New(),
+		versions:    map[int]*iris.Router{},
+		middlewares: map[string][]Middleware{MiddlewareTypeAll: []Middleware{}},
 	}
 }
 
@@ -124,4 +131,48 @@ func (h *Server) GetApp() *iris.Framework {
 func (h *Server) Start() {
 	h.start = time.Now()
 	h.iris.Listen(h.config.Host + ":" + h.config.Port)
+}
+
+const (
+	// MiddlewareTypeAll special type
+	MiddlewareTypeAll = "*"
+)
+
+// AddMiddleware adds a middleware for the given types
+func (h *Server) AddMiddleware(mw Middleware, kinds ...string) *Server {
+	var (
+		collection []Middleware
+		ok         bool
+	)
+	kinds = append(kinds, MiddlewareTypeAll)
+	for _, k := range kinds {
+		if collection, ok = h.middlewares[k]; !ok {
+			collection = make([]Middleware, 0, 2)
+		}
+		collection = append(collection, mw)
+		h.middlewares[k] = collection
+	}
+	return h
+}
+
+// GetMiddlewares get all midlewares of a kind
+func (h *Server) GetMiddlewares(kind string) []Middleware {
+	return h.middlewares[kind]
+}
+
+// GetMiddlewareHandlerFun returns all the handler functions of a middleware kind
+func (h *Server) GetMiddlewareHandlerFun(kind string) []iris.HandlerFunc {
+	var funcs []iris.HandlerFunc
+	mws := h.GetMiddlewares(kind)
+	funcs = make([]iris.HandlerFunc, len(mws), len(mws)+1)
+	for i, mw := range mws {
+		funcs[i] = mw.Serve
+	}
+	return funcs
+}
+
+// GetMiddlewaresDecorated gets all the handler functions of a kind and decorate the target function
+func (h *Server) GetMiddlewaresDecorated(kind string, handlerFunc iris.HandlerFunc) []iris.HandlerFunc {
+	funcs := h.GetMiddlewareHandlerFun(kind)
+	return append(funcs, handlerFunc)
 }
