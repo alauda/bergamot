@@ -13,7 +13,7 @@ import (
 
 // Router interface for http endpoints
 type Router interface {
-	AddRoutes(router *iris.Router)
+	AddRoutes(router *iris.Router, server *Server)
 }
 
 // Middleware adding middleware
@@ -95,7 +95,7 @@ func (h *Server) AddVersion(version int) *Server {
 // should be executed before the Start method and after the Init method
 func (h *Server) AddEndpoint(relativePath string, handler Router) *Server {
 	router := h.iris.Party(relativePath)
-	handler.AddRoutes(router)
+	handler.AddRoutes(router, h)
 
 	return h
 }
@@ -105,7 +105,7 @@ func (h *Server) AddEndpoint(relativePath string, handler Router) *Server {
 // If the version was not created previously will then be created automatically
 func (h *Server) AddVersionEndpoint(version int, relativePath string, handler Router) *Server {
 	h.AddVersion(version)
-	handler.AddRoutes(h.versions[version].Party(relativePath))
+	handler.AddRoutes(h.versions[version].Party(relativePath), h)
 	return h
 }
 
