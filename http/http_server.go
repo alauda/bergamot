@@ -170,13 +170,7 @@ func (h *Server) GetMiddlewares(kind string) []Middleware {
 
 // GetMiddlewareHandlerFun returns all the handler functions of a middleware kind
 func (h *Server) GetMiddlewareHandlerFun(kind string) []iris.HandlerFunc {
-	var funcs []iris.HandlerFunc
-	mws := h.GetMiddlewares(kind)
-	funcs = make([]iris.HandlerFunc, len(mws), len(mws)+1)
-	for i, mw := range mws {
-		funcs[i] = mw.Serve
-	}
-	return funcs
+	return GetMiddlewareHandlerFunc(h.GetMiddlewares(kind)...)
 }
 
 // GetMiddlewaresDecorated gets all the handler functions of a collection of kinds and decorate the target function
@@ -187,4 +181,19 @@ func (h *Server) GetMiddlewaresDecorated(handlerFunc iris.HandlerFunc, kinds ...
 	}
 	mws = append(mws, handlerFunc)
 	return mws
+}
+
+// GetMiddlewareHandlerFunc get only the functions from middlewares
+func GetMiddlewareHandlerFunc(mws ...Middleware) []iris.HandlerFunc {
+	var funcs []iris.HandlerFunc
+	funcs = make([]iris.HandlerFunc, len(mws), len(mws)+1)
+	for i, mw := range mws {
+		funcs[i] = mw.Serve
+	}
+	return funcs
+}
+
+// DecorateHandlerFunc prepend all the given middlewares
+func DecorateHandlerFunc(handlerFunc iris.HandlerFunc, mws ...Middleware) []iris.HandlerFunc {
+	return append(GetMiddlewareHandlerFunc(mws...), handlerFunc)
 }
