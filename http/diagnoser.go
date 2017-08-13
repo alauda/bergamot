@@ -18,7 +18,7 @@ func NewDiagnoser(checker *diagnose.HealthChecker) *DiagnoseRouter {
 }
 
 // AddRoutes will add a route for diagnose endpoint
-func (h *DiagnoseRouter) AddRoutes(router *iris.Router) {
+func (h *DiagnoseRouter) AddRoutes(router *iris.Router, server *Server) {
 	router.Any("", func(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, h.Check())
 	})
