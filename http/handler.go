@@ -21,9 +21,13 @@ const (
 )
 
 // GetContext get context with predefined keys
-func (Handler) GetContext(ctx *iris.Context) context.Context {
+func (Handler) GetContext(ctx *iris.Context, attach bool) context.Context {
+	var parent context.Context
+	if attach {
+		parent = ctx
+	}
 	// string
-	c := contexts.SetPath(ctx, ctx.Path())
+	c := contexts.SetPath(parent, ctx.Path())
 
 	// map[string]string
 	c = contexts.SetParams(c, ctx.URLParams())

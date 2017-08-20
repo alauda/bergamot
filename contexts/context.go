@@ -25,6 +25,11 @@ var (
 	ArgsKey ContextArgumentsKey
 )
 
+// New constructs a new context
+func New() context.Context {
+	return context.TODO()
+}
+
 // SetPath set a string value to be used as a path string to a context
 func SetPath(ctx context.Context, value string) context.Context {
 	return context.WithValue(ctx, PathKey, value)
