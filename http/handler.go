@@ -3,33 +3,11 @@ package http
 import (
 	"context"
 
+	"github.com/alauda/bergamot/contexts"
 	"github.com/alauda/bergamot/errors"
 	"github.com/alauda/bergamot/log"
 
 	iris "gopkg.in/kataras/iris.v6"
-)
-
-const (
-	// USER constant key for user in iris.Context
-	USER = "USER"
-)
-
-// ContextUserKey user key
-type ContextUserKey struct{}
-
-// ContextParamsKey params key
-type ContextParamsKey struct{}
-
-// ContextPathKey path key
-type ContextPathKey struct{}
-
-var (
-	// UserKey static key for UserObject in context
-	UserKey ContextUserKey
-	// ParamsKey static key for Query parameters in request
-	ParamsKey ContextParamsKey
-	// PathKey path string key for context
-	PathKey ContextPathKey
 )
 
 // Handler base handler with common shared methods
@@ -37,14 +15,30 @@ var (
 type Handler struct {
 }
 
+const (
+	// USER constant key for user in iris.Context
+	USER = "USER"
+)
+
 // GetContext get context with predefined keys
 func (Handler) GetContext(ctx *iris.Context) context.Context {
 	// string
-	c := context.WithValue(nil, PathKey, ctx.Path())
+	c := contexts.SetPath(ctx, ctx.Path())
+
 	// map[string]string
-	c = context.WithValue(c, ParamsKey, ctx.URLParams())
+	c = contexts.SetParams(c, ctx.URLParams())
+
 	// user
-	c = context.WithValue(c, UserKey, ctx.Get(USER))
+	c = contexts.SetUser(c, ctx.Get(USER))
+
+	// URL arguments
+	arguments := map[string]string{}
+	ctx.VisitValues(func(key string, value interface{}) {
+		if val, ok := value.(string); ok {
+			arguments[key] = val
+		}
+	})
+	c = contexts.SetArgs(c, arguments)
 	return c
 }
 
