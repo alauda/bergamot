@@ -1,10 +1,6 @@
 package errors
 
-import (
-	"fmt"
-
-	"github.com/alauda/bergamot/errors"
-)
+import "fmt"
 
 // Code references to the kind of error that was returned
 type Code string
@@ -185,5 +181,5 @@ func TreatError(source string, err error, code string) *AlaudaError {
 	if alaudaErr, ok := err.(*AlaudaError); ok {
 		return alaudaErr
 	}
-	return errors.NewCommon(source, err).SetCodeString(code)
+	return NewCommon(source, err).SetCodeString(code)
 }
