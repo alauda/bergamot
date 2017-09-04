@@ -14,6 +14,9 @@ type ContextPathKey struct{}
 // ContextArgumentsKey path key
 type ContextArgumentsKey struct{}
 
+// ContextBodyKey path key
+type ContextBodyKey struct{}
+
 var (
 	// UserKey static key for UserObject in context
 	UserKey ContextUserKey
@@ -23,6 +26,8 @@ var (
 	PathKey ContextPathKey
 	// ArgsKey key for arguments in URL
 	ArgsKey ContextArgumentsKey
+	// BodyKey key for body in a request
+	BodyKey ContextBodyKey
 )
 
 // New constructs a new context
@@ -90,4 +95,14 @@ func GetArgs(ctx context.Context) (value map[string]string) {
 		}
 	}
 	return
+}
+
+// SetBody set an interface as the body of the payload
+func SetBody(ctx context.Context, body interface{}) context.Context {
+	return context.WithValue(ctx, BodyKey, body)
+}
+
+// GetBody gets body from context
+func GetBody(ctx context.Context) interface{} {
+	return ctx.Value(BodyKey)
 }

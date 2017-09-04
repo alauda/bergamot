@@ -4,6 +4,7 @@ import "github.com/alauda/loggo"
 
 // Logger interface to define a logger entity
 type Logger interface {
+	Tracef(format string, args ...interface{})
 	Debugf(format string, args ...interface{})
 	Infof(format string, args ...interface{})
 	Errorf(format string, args ...interface{})
@@ -20,8 +21,10 @@ type Logger interface {
 type Level int
 
 const (
+	// LevelTrace prints all tracing and up
+	LevelTrace Level = iota
 	// LevelDebug prints all messages
-	LevelDebug Level = iota
+	LevelDebug
 	// LevelInfo prints only info or higher
 	LevelInfo
 	// LevelError prints only error messages
@@ -38,9 +41,11 @@ func SetLevel(level Level) {
 	case LevelError:
 		config = "<root>=ERROR"
 	case LevelDebug:
+		config = "<root>=DEBUG"
+	case LevelTrace:
 		fallthrough
 	default:
-		config = "<root>=DEBUG"
+		config = "<root>=TRACE"
 
 	}
 	loggo.ConfigureLoggers(config)

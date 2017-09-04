@@ -12,8 +12,8 @@ import (
 type (
 	// RedisCache abstraction used to store a redis connection
 	RedisCache struct {
-		Read  *aredis.RedisClient
-		Write *aredis.RedisClient
+		Read  *aredis.Client
+		Write *aredis.Client
 	}
 
 	// RedisOpts abstraction for connection settings
@@ -27,13 +27,13 @@ type (
 
 // NewRedis constructor method for a new Redis cache
 func NewRedis(opts RedisOpts, writeOpts RedisOpts) (*RedisCache, error) {
-	readOpts := aredis.RedisClientOptions{
+	readOpts := aredis.Options{
 		Type:     aredis.ClientNormal,
 		Hosts:    []string{opts.GetAddr()},
 		Password: opts.Password,
 		Database: opts.DB,
 	}
-	writerOpts := aredis.RedisClientOptions{
+	writerOpts := aredis.Options{
 		Type:     aredis.ClientNormal,
 		Password: writeOpts.Password,
 		Database: writeOpts.DB,
@@ -46,11 +46,11 @@ func NewRedis(opts RedisOpts, writeOpts RedisOpts) (*RedisCache, error) {
 }
 
 // NewAlaudaRedis construtor based on alauda redis client
-func NewAlaudaRedis(opts aredis.RedisClientOptions, writerOpts aredis.RedisClientOptions) (*RedisCache, error) {
-	reader := aredis.NewRedisClient(opts)
+func NewAlaudaRedis(opts aredis.Options, writerOpts aredis.Options) (*RedisCache, error) {
+	reader := aredis.NewClient(opts)
 	writer := reader
 	if len(writerOpts.Hosts) > 0 {
-		writer = aredis.NewRedisClient(writerOpts)
+		writer = aredis.NewClient(writerOpts)
 	}
 	client := &RedisCache{
 		Read:  reader,
