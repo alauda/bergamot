@@ -16,6 +16,12 @@ type (
 		Write *aredis.Client
 	}
 
+	// Cache interface to describe a Cache client
+	Cache interface {
+		Reader() aredis.Commander
+		Writer() aredis.Commander
+	}
+
 	// RedisOpts abstraction for connection settings
 	RedisOpts struct {
 		Host     string
@@ -60,6 +66,16 @@ func NewAlaudaRedis(opts aredis.Options, writerOpts aredis.Options) (*RedisCache
 		return nil, err
 	}
 	return client, nil
+}
+
+// Reader returns a read commander
+func (r *RedisCache) Reader() aredis.Commander {
+	return r.Read
+}
+
+// Writer returns a write commander
+func (r *RedisCache) Writer() aredis.Commander {
+	return r.Write
 }
 
 // Diagnose start diagnose check

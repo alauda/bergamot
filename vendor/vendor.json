@@ -22,10 +22,10 @@
 			"revisionTime": "2017-05-09T17:40:47Z"
 		},
 		{
-			"checksumSHA1": "m/RyOItyHl5TaizGRg9GqRU4l2s=",
+			"checksumSHA1": "dX8VO9cjzpkojCDFgeaZofrqf1o=",
 			"path": "github.com/alauda/go-redis-client",
-			"revision": "70a573e0e108dfc4075bab6cb4fababa43f75209",
-			"revisionTime": "2017-08-25T22:48:36Z"
+			"revision": "bbe7aef9e817d6d62d0b889c661781bd983fb66f",
+			"revisionTime": "2017-09-08T22:09:16Z"
 		},
 		{
 			"checksumSHA1": "ZQifjwDVyDeyrHCUdIhh4gOotEE=",
