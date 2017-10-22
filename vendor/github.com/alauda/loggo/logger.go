@@ -162,23 +162,19 @@ func limitString(message string, size int, char rune) string {
 
 func (logger Logger) generateStructured(message string, fields Fields) (format string, args []interface{}) {
 	var buf bytes.Buffer
-	args = make([]interface{}, 1+len(fields)*2)
-	index := 0
-	if logger.size > 0 {
-		message = limitString(message, logger.size, ' ')
+	if len(message) > 0 {
+		fields["msg"] = message
 	}
-	args[index] = message
-	index++
-
-	buf.WriteString("\"%s\"")
+	args = make([]interface{}, len(fields)*2)
+	index := 0
 	for k, v := range fields {
-		buf.WriteString("\t%s")
+		buf.WriteString("%s")
 		args[index] = k
 		index++
 
 		buf.WriteString("=")
 
-		buf.WriteString("%v")
+		buf.WriteString("\"%v\" ")
 		args[index] = v
 		index++
 	}

@@ -1,6 +1,11 @@
 package log
 
-import "github.com/alauda/loggo"
+import (
+	"context"
+
+	"github.com/alauda/bergamot/contexts"
+	"github.com/alauda/loggo"
+)
 
 // Logger interface to define a logger entity
 type Logger interface {
@@ -49,6 +54,21 @@ func SetLevel(level Level) {
 
 	}
 	loggo.ConfigureLoggers(config)
+}
+
+// GetFields get fields using a context
+func GetFields(ctx context.Context) (fields loggo.Fields) {
+	return AddRequestID(ctx, fields)
+}
+
+// AddRequestID adds the request Id to fields if one is there
+func AddRequestID(ctx context.Context, fields loggo.Fields) loggo.Fields {
+	if ctx != nil {
+		if request := contexts.GetRequestID(ctx); request != "" {
+			fields["request_id"] = request
+		}
+	}
+	return fields
 }
 
 // NewLogger constructs a new logger for package

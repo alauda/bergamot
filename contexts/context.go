@@ -17,6 +17,9 @@ type ContextArgumentsKey struct{}
 // ContextBodyKey path key
 type ContextBodyKey struct{}
 
+// ContextRequestIDKey request id key
+type ContextRequestIDKey struct{}
+
 var (
 	// UserKey static key for UserObject in context
 	UserKey ContextUserKey
@@ -28,6 +31,8 @@ var (
 	ArgsKey ContextArgumentsKey
 	// BodyKey key for body in a request
 	BodyKey ContextBodyKey
+	// RequestIDKey key for request ID
+	RequestIDKey ContextRequestIDKey
 )
 
 // New constructs a new context
@@ -105,4 +110,19 @@ func SetBody(ctx context.Context, body interface{}) context.Context {
 // GetBody gets body from context
 func GetBody(ctx context.Context) interface{} {
 	return ctx.Value(BodyKey)
+}
+
+// SetRequestID sets a request ID into context
+func SetRequestID(ctx context.Context, requestID string) context.Context {
+	return context.WithValue(ctx, RequestIDKey, requestID)
+}
+
+// GetRequestID get request ID from context
+func GetRequestID(ctx context.Context) (requestID string) {
+	if ctx != nil {
+		if val := ctx.Value(RequestIDKey); val != nil {
+			requestID, _ = val.(string)
+		}
+	}
+	return
 }
