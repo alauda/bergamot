@@ -58,6 +58,7 @@ func SetLevel(level Level) {
 
 // GetFields get fields using a context
 func GetFields(ctx context.Context) (fields loggo.Fields) {
+	fields = loggo.Fields{}
 	return AddRequestID(ctx, fields)
 }
 
