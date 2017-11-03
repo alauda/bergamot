@@ -189,6 +189,9 @@ func (r *Client) HSetNX(key, field string, value interface{}) *redis.BoolCmd {
 func (r *Client) HVals(key string) *redis.StringSliceCmd {
 	return r.client.HVals(r.k(key))
 }
+func (r *Client) HDel(key string, fields ...string) *redis.IntCmd {
+	return r.client.HDel(r.k(key), fields...)
+}
 
 // -------------- Lister
 
@@ -436,7 +439,7 @@ func (r *Client) HScan(key string, cursor uint64, match string, count int64) *re
 
 // -------------- Publisher
 
-func (r *Client) Publish(channel, message string) *redis.IntCmd {
+func (r *Client) Publish(channel string, message interface{}) *redis.IntCmd {
 	return r.client.Publish(r.k(channel), message)
 }
 func (r *Client) Subscribe(channels ...string) *redis.PubSub {
