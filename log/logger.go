@@ -10,12 +10,18 @@ import (
 	"github.com/alauda/loggo"
 )
 
-// Logger interface to define a logger entity
-type Logger interface {
+// StandardLogger stan
+type StandardLogger interface {
 	Tracef(format string, args ...interface{})
 	Debugf(format string, args ...interface{})
 	Infof(format string, args ...interface{})
+	Warningf(format string, args ...interface{})
 	Errorf(format string, args ...interface{})
+}
+
+// Logger interface to define a logger entity
+type Logger interface {
+	StandardLogger
 
 	StCritical(message string, fields loggo.Fields)
 	StError(message string, fields loggo.Fields)

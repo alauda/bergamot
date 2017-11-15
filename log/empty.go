@@ -14,6 +14,9 @@ func (EmptyLogger) Debugf(format string, args ...interface{}) {}
 // Infof nothing
 func (EmptyLogger) Infof(format string, args ...interface{}) {}
 
+// Warningf nothing
+func (EmptyLogger) Warningf(format string, args ...interface{}) {}
+
 // Errorf nothing
 func (EmptyLogger) Errorf(format string, args ...interface{}) {}
 
