@@ -23,11 +23,38 @@ type Middleware interface {
 
 // Config configuration for the HTTP server
 type Config struct {
-	Host           string
-	Port           string
-	AddLog         bool
-	AddHealthCheck bool
-	Component      string
+	Host               string
+	Port               string
+	AddLog             bool
+	AddHealthCheck     bool
+	TreatNotFoundError bool
+	Component          string
+	MaxReadBufferSize  int
+	AllowedOrigins     []string
+}
+
+// SaneDefaults verifies the options and sets some sane defaults if
+// the set values are not setup or not valid
+func (c Config) SaneDefaults() Config {
+	if c.MaxReadBufferSize <= 0 {
+		c.MaxReadBufferSize = 1024 * 1024
+	}
+	if len(c.AllowedOrigins) == 0 {
+		c.AllowedOrigins = []string{"*"}
+	}
+	return c
+}
+
+// GetIrisOptions returns the options for the iris http server
+func (c Config) GetIrisOptions() []iris.OptionSetter {
+	return []iris.OptionSetter{
+		iris.OptionMaxHeaderBytes(c.MaxReadBufferSize),
+	}
+}
+
+// GetCorsOptions return cors options for iris http router
+func (c Config) GetCorsOptions() cors.Options {
+	return cors.Options{AllowedOrigins: c.AllowedOrigins}
 }
 
 // Server Full HTTP server
@@ -42,10 +69,11 @@ type Server struct {
 
 // NewServer constructor function for the HTTP server
 func NewServer(config Config, log log.Logger) *Server {
+	config = config.SaneDefaults()
 	return &Server{
 		config:      config,
 		log:         log,
-		iris:        iris.New(),
+		iris:        iris.New(config.GetIrisOptions()...),
 		versions:    map[int]*iris.Router{},
 		middlewares: map[string][]Middleware{MiddlewareTypeAll: []Middleware{}},
 	}
@@ -60,7 +88,7 @@ func (h *Server) Init() *Server {
 		httprouter.New(),
 
 		// Cors wrapper to the entire application, allow all origins.
-		cors.New(cors.Options{AllowedOrigins: []string{"*"}}),
+		cors.New(h.config.GetCorsOptions()),
 	)
 
 	if h.config.AddHealthCheck {
@@ -72,6 +100,8 @@ func (h *Server) Init() *Server {
 	if h.config.AddLog {
 		// Adding request logger middleware
 		h.iris.Use(h)
+	}
+	if h.config.TreatNotFoundError {
 		// default error when requesting unexistent route
 		h.iris.OnError(iris.StatusNotFound, func(ctx *iris.Context) {
 			// print method and stuff
