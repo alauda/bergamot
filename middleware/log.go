@@ -2,7 +2,7 @@ package middleware
 
 import (
 	"github.com/alauda/bergamot/log"
-	"github.com/alauda/loggo"
+	"github.com/alauda/bergamot/loggo"
 )
 
 // based on: https://gokit.io/examples/stringsvc.html

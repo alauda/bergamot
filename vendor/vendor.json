@@ -29,7 +29,7 @@
 		},
 		{
 			"checksumSHA1": "3v5uSU10fwt5zNqR91Ns80XMnrY=",
-			"path": "github.com/alauda/loggo",
+			"path": "github.com/alauda/bergamot/loggo",
 			"revision": "ab9597dcd0c59c55f943fe47c32eee22b8c48240",
 			"revisionTime": "2017-10-22T06:36:31Z"
 		},

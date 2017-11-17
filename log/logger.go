@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/alauda/bergamot/contexts"
-	"github.com/alauda/loggo"
+	"github.com/alauda/bergamot/loggo"
 )
 
 // StandardLogger stan

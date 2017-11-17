@@ -24,7 +24,7 @@ type Registration func(server *grpc.Server)
 type Server struct {
 	config     Config
 	registrars []Registration
-	log        log.Logger
+	log        log.StandardLogger
 }
 
 // Config configuration for GRPC server
@@ -35,7 +35,7 @@ type Config struct {
 }
 
 // New constructor function for the gRPC server
-func New(config Config, log log.Logger) *Server {
+func New(config Config, log log.StandardLogger) *Server {
 	return &Server{
 		config:     config,
 		log:        log,
@@ -58,7 +58,7 @@ func (g *Server) Start() error {
 	}
 	listen, err := net.Listen("tcp", ":"+g.config.Port)
 	if err != nil {
-		g.log.Errorf("Error listening to port %s: %v", g.config.Port, err)
+		g.log.Errorf("error listening to port", "port", g.config.Port, "err", err)
 		return err
 	}
 
@@ -100,10 +100,10 @@ func (g *Server) Start() error {
 		go g.PeriodicFree(g.config.PeriodicMemory)
 	}
 
-	g.log.Debugf("Serving GRPC server on port %s.....", g.config.Port)
+	g.log.Debugf("serving grpc", "port", g.config.Port)
 	// Start serving...
 	if err = mux.Serve(); err != nil {
-		g.log.Errorf("Error serving gRPC: %v", err)
+		g.log.Errorf("error service grpc", "err", err)
 	}
 	return err
 }

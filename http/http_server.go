@@ -16,6 +16,9 @@ type Router interface {
 	AddRoutes(router *iris.Router, server *Server)
 }
 
+// AddRoutesFunc a function to add a route
+type AddRoutesFunc func(router *iris.Router, server *Server)
+
 // Middleware adding middleware
 type Middleware interface {
 	Serve(ctx *iris.Context)
@@ -134,15 +137,22 @@ func (h *Server) AddEndpoint(relativePath string, handler Router) *Server {
 // Used like AddEndpoint but will add on a specific version instead.
 // If the version was not created previously will then be created automatically
 func (h *Server) AddVersionEndpoint(version int, relativePath string, handler Router) *Server {
+	return h.AddVersionEndpointFunc(version, relativePath, handler.AddRoutes)
+}
+
+// AddVersionEndpointFunc add a root endpoint to a version specific API
+// Used like AddEndpoint but will add on a specific version instead.
+// If the version was not created previously will then be created automatically
+func (h *Server) AddVersionEndpointFunc(version int, relativePath string, addRoutesFunc AddRoutesFunc) *Server {
 	h.AddVersion(version)
-	handler.AddRoutes(h.versions[version].Party(relativePath), h)
+	addRoutesFunc(h.versions[version].Party(relativePath), h)
 	return h
 }
 
 // Serve will log all the requests
 func (h *Server) Serve(ctx *iris.Context) {
 	// logging all requests
-	h.log.Infof("---- [%s] %s  - args: %s ", ctx.Method(), ctx.Path(), ctx.ParamsSentence())
+	h.log.Infof("request", "method", ctx.Method(), "path", ctx.Path(), "params", ctx.ParamsSentence())
 	ctx.Next()
 }
 

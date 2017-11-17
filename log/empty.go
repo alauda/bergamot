@@ -1,6 +1,6 @@
 package log
 
-import "github.com/alauda/loggo"
+import "github.com/alauda/bergamot/loggo"
 
 // EmptyLogger empty logger (does nothing)
 type EmptyLogger struct{}
