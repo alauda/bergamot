@@ -8,6 +8,7 @@ import (
 
 	"github.com/alauda/bergamot/contexts"
 	"github.com/alauda/bergamot/loggo"
+	aloggo "github.com/alauda/loggo"
 )
 
 // StandardLogger stan
@@ -83,9 +84,15 @@ func AddRequestID(ctx context.Context, fields loggo.Fields) loggo.Fields {
 
 // NewLogger constructs a new logger for package
 // @param: packageName stands for the package of your logger
-// @param: size given one integer will set the size for the message on structured log
+// @param: depth given one integer will set the depth in which will find during runtime the file and line number
+// recommended to use 3 as a number (only the first integer will be used)
 func NewLogger(packageName string, size ...int) Logger {
 	return loggo.GetLogger(packageName, size...)
+}
+
+// NewStandardLogger constructs a standard logger
+func NewStandardLogger(packageName string, depth ...int) StandardLogger {
+	return aloggo.GetLogger(packageName, depth...)
 }
 
 // NewNoCodeLogger will not print file
