@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/alauda/bergamot/log"
+	"github.com/alauda/bergamot/loggo"
 
 	"gopkg.in/kataras/iris.v6"
 	"gopkg.in/kataras/iris.v6/adaptors/cors"
@@ -29,8 +30,10 @@ type Config struct {
 	Host               string
 	Port               string
 	AddLog             bool
+	LogFunc            iris.HandlerFunc
 	AddHealthCheck     bool
 	TreatNotFoundError bool
+	NotFoundFunc       iris.HandlerFunc
 	Component          string
 	MaxReadBufferSize  int
 	AllowedOrigins     []string
@@ -100,16 +103,13 @@ func (h *Server) Init() *Server {
 		h.iris.Any("/_ping", h.Healthcheck)
 	}
 
-	if h.config.AddLog {
+	if h.config.AddLog && h.config.LogFunc != nil {
 		// Adding request logger middleware
-		h.iris.Use(h)
+		h.iris.Use(h.config.LogFunc)
 	}
-	if h.config.TreatNotFoundError {
+	if h.config.TreatNotFoundError && h.config.NotFoundFunc != nil {
 		// default error when requesting unexistent route
-		h.iris.OnError(iris.StatusNotFound, func(ctx *iris.Context) {
-			// print method and stuff
-			h.Serve(ctx)
-		})
+		h.iris.OnError(iris.StatusNotFound, h.config.NotFoundFunc)
 	}
 
 	return h
@@ -147,13 +147,6 @@ func (h *Server) AddVersionEndpointFunc(version int, relativePath string, addRou
 	h.AddVersion(version)
 	addRoutesFunc(h.versions[version].Party(relativePath), h)
 	return h
-}
-
-// Serve will log all the requests
-func (h *Server) Serve(ctx *iris.Context) {
-	// logging all requests
-	h.log.Infof("request", "method", ctx.Method(), "path", ctx.Path(), "params", ctx.ParamsSentence())
-	ctx.Next()
 }
 
 // Healthcheck healthcheck endpoint
@@ -236,4 +229,36 @@ func GetMiddlewareHandlerFunc(mws ...Middleware) []iris.HandlerFunc {
 // DecorateHandlerFunc prepend all the given middlewares
 func DecorateHandlerFunc(handlerFunc iris.HandlerFunc, mws ...Middleware) []iris.HandlerFunc {
 	return append(GetMiddlewareHandlerFunc(mws...), handlerFunc)
+}
+
+// NewStLogFunc returns a middleware print function using StLogger
+func NewStLogFunc(logger log.StLogger) iris.HandlerFunc {
+	return func(ctx *iris.Context) {
+		logger.StInfo("request", loggo.Fields{
+			"method": ctx.Method(),
+			"path":   ctx.Path(),
+			"params": ctx.ParamsSentence(),
+		})
+		ctx.Next()
+	}
+}
+
+// NewStandardLogFunc returns a middleware print function using StandardLogger
+func NewStandardLogFunc(logger log.StandardLogger) iris.HandlerFunc {
+	return func(ctx *iris.Context) {
+		logger.Infof("[%s] - path: %s\tparams: %s", ctx.Method(), ctx.Path(), ctx.ParamsSentence())
+		ctx.Next()
+	}
+}
+
+// NewStructuredLogFunc returns a middleware print function using StructuredLogger
+func NewStructuredLogFunc(logger log.StructuredLogger) iris.HandlerFunc {
+	return func(ctx *iris.Context) {
+		logger.Info("request",
+			"method", ctx.Method(),
+			"path", ctx.Path(),
+			"params", ctx.ParamsSentence(),
+		)
+		ctx.Next()
+	}
 }

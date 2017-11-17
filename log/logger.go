@@ -20,16 +20,30 @@ type StandardLogger interface {
 	Errorf(format string, args ...interface{})
 }
 
-// Logger interface to define a logger entity
-type Logger interface {
-	StandardLogger
+// StructuredLogger simplified structured logger signature
+type StructuredLogger interface {
+	Trace(msg string, keyValues ...interface{})
+	Debug(msg string, keyValues ...interface{})
+	Info(msg string, keyValues ...interface{})
+	Warning(msg string, keyValues ...interface{})
+	Error(msg string, keyValues ...interface{})
+}
 
+// StLogger St logging functions for using with loggo.Fields
+type StLogger interface {
 	StCritical(message string, fields loggo.Fields)
 	StError(message string, fields loggo.Fields)
 	StWarning(message string, fields loggo.Fields)
 	StInfo(message string, fields loggo.Fields)
 	StDebug(message string, fields loggo.Fields)
 	StTrace(message string, fields loggo.Fields)
+}
+
+// Logger interface to define a logger entity
+type Logger interface {
+	StandardLogger
+	StructuredLogger
+	StLogger
 }
 
 // Level defines log levels
@@ -106,4 +120,29 @@ func NewNoCodeLogger(name string, size ...int) Logger {
 func NoCodeFormat(entry loggo.Entry) string {
 	ts := entry.Timestamp.In(time.UTC).Format("2006-01-02 15:04:05")
 	return fmt.Sprintf("%s %s %s %s", ts, entry.Level, entry.Module, entry.Message)
+}
+
+// F generates a map using a key-value pairs as arguments
+// for example, if given arguments are "key" and 1 will return
+// map[string]interface{}{"key": 1}
+// PS: will not add key if the value is missing
+func F(args ...interface{}) (res map[string]interface{}) {
+	res = make(map[string]interface{})
+	if len(args) > 0 {
+		// avoiding nil cases
+		var (
+			k  string
+			ok bool
+		)
+		for i, v := range args {
+			if i%2 == 0 {
+				if k, ok = v.(string); !ok {
+					k = fmt.Sprintf("%v", v)
+				}
+			} else {
+				res[k] = v
+			}
+		}
+	}
+	return
 }

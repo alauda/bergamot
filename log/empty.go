@@ -20,6 +20,21 @@ func (EmptyLogger) Warningf(format string, args ...interface{}) {}
 // Errorf nothing
 func (EmptyLogger) Errorf(format string, args ...interface{}) {}
 
+// Trace nothing
+func (EmptyLogger) Trace(format string, args ...interface{}) {}
+
+// Debug nothing
+func (EmptyLogger) Debug(format string, args ...interface{}) {}
+
+// Info nothing
+func (EmptyLogger) Info(format string, args ...interface{}) {}
+
+// Warning nothing
+func (EmptyLogger) Warning(format string, args ...interface{}) {}
+
+// Error nothing
+func (EmptyLogger) Error(format string, args ...interface{}) {}
+
 // StCritical nothing
 func (EmptyLogger) StCritical(message string, fields loggo.Fields) {}
 

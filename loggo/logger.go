@@ -118,36 +118,72 @@ func (logger Logger) LogCallf(calldepth int, level Level, message string, args .
 
 // Criticalf logs the printf-formatted message at critical level.
 func (logger Logger) Criticalf(message string, args ...interface{}) {
-	msg, ar := logger.generateStructuredMsg(message, args...)
-	logger.Logf(CRITICAL, msg, ar...)
+	logger.Logf(CRITICAL, message, args...)
 }
 
 // Errorf logs the printf-formatted message at error level.
 func (logger Logger) Errorf(message string, args ...interface{}) {
-	msg, ar := logger.generateStructuredMsg(message, args...)
-	logger.Logf(ERROR, msg, ar...)
+	logger.Logf(ERROR, message, args...)
 }
 
 // Warningf logs the printf-formatted message at warning level.
 func (logger Logger) Warningf(message string, args ...interface{}) {
-	msg, ar := logger.generateStructuredMsg(message, args...)
-	logger.Logf(WARNING, msg, ar...)
+	logger.Logf(WARNING, message, args...)
 }
 
 // Infof logs the printf-formatted message at info level.
 func (logger Logger) Infof(message string, args ...interface{}) {
-	msg, ar := logger.generateStructuredMsg(message, args...)
-	logger.Logf(INFO, msg, ar...)
+	logger.Logf(INFO, message, args...)
 }
 
 // Debugf logs the printf-formatted message at debug level.
 func (logger Logger) Debugf(message string, args ...interface{}) {
-	msg, ar := logger.generateStructuredMsg(message, args...)
-	logger.Logf(DEBUG, msg, ar...)
+	logger.Logf(DEBUG, message, args...)
 }
 
 // Tracef logs the printf-formatted message at trace level.
 func (logger Logger) Tracef(message string, args ...interface{}) {
+	logger.Logf(TRACE, message, args...)
+}
+
+// Critical logs the structured formatted message at critical level.
+// args will be considered as key-value pairs
+func (logger Logger) Critical(message string, args ...interface{}) {
+	msg, ar := logger.generateStructuredMsg(message, args...)
+	logger.Logf(CRITICAL, msg, ar...)
+}
+
+// Error logs the structured formatted message at error level.
+// args will be considered as key-value pairs
+func (logger Logger) Error(message string, args ...interface{}) {
+	msg, ar := logger.generateStructuredMsg(message, args...)
+	logger.Logf(ERROR, msg, ar...)
+}
+
+// Warning logs the structured formatted message at warning level.
+// args will be considered as key-value pairs
+func (logger Logger) Warning(message string, args ...interface{}) {
+	msg, ar := logger.generateStructuredMsg(message, args...)
+	logger.Logf(WARNING, msg, ar...)
+}
+
+// Info logs the structured formatted message at info level.
+// args will be considered as key-value pairs
+func (logger Logger) Info(message string, args ...interface{}) {
+	msg, ar := logger.generateStructuredMsg(message, args...)
+	logger.Logf(INFO, msg, ar...)
+}
+
+// Debug logs the structured formatted message at debug level.
+// args will be considered as key-value pairs
+func (logger Logger) Debug(message string, args ...interface{}) {
+	msg, ar := logger.generateStructuredMsg(message, args...)
+	logger.Logf(DEBUG, msg, ar...)
+}
+
+// Trace logs the structured formatted message at trace level.
+// args will be considered as key-value pairs
+func (logger Logger) Trace(message string, args ...interface{}) {
 	msg, ar := logger.generateStructuredMsg(message, args...)
 	logger.Logf(TRACE, msg, ar...)
 }
@@ -168,7 +204,7 @@ func limitString(message string, size int, char rune) string {
 	}
 }
 
-func (logger Logger) generateStructured(message string, fields Fields) (string, []interface{}) {
+func (logger Logger) generateStructured(message string, fields map[string]interface{}) (string, []interface{}) {
 	args := make([]interface{}, 0, len(fields)*2)
 	keys := make([]string, 0, len(fields))
 	for k := range fields {

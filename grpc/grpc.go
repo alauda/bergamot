@@ -35,10 +35,9 @@ type Config struct {
 }
 
 // New constructor function for the gRPC server
-func New(config Config, log log.StandardLogger) *Server {
+func New(config Config) *Server {
 	return &Server{
 		config:     config,
-		log:        log,
 		registrars: make([]Registration, 0, 1),
 	}
 }
@@ -58,7 +57,6 @@ func (g *Server) Start() error {
 	}
 	listen, err := net.Listen("tcp", ":"+g.config.Port)
 	if err != nil {
-		g.log.Errorf("error listening to port", "port", g.config.Port, "err", err)
 		return err
 	}
 
@@ -100,12 +98,8 @@ func (g *Server) Start() error {
 		go g.PeriodicFree(g.config.PeriodicMemory)
 	}
 
-	g.log.Debugf("serving grpc", "port", g.config.Port)
 	// Start serving...
-	if err = mux.Serve(); err != nil {
-		g.log.Errorf("error service grpc", "err", err)
-	}
-	return err
+	return mux.Serve()
 }
 
 // PeriodicFree returns memory to OS given a span of time
