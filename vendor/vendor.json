@@ -22,16 +22,16 @@
 			"revisionTime": "2017-05-09T17:40:47Z"
 		},
 		{
-			"checksumSHA1": "jxfr7LL4fJMSeTCT0E4xEfMgoNk=",
-			"path": "github.com/alauda/go-redis-client",
-			"revision": "a90ea14ebebab48949ac0217104ad7a6b475cfa8",
-			"revisionTime": "2017-11-03T09:21:27Z"
-		},
-		{
 			"checksumSHA1": "3v5uSU10fwt5zNqR91Ns80XMnrY=",
 			"path": "github.com/alauda/bergamot/loggo",
 			"revision": "ab9597dcd0c59c55f943fe47c32eee22b8c48240",
 			"revisionTime": "2017-10-22T06:36:31Z"
+		},
+		{
+			"checksumSHA1": "jxfr7LL4fJMSeTCT0E4xEfMgoNk=",
+			"path": "github.com/alauda/go-redis-client",
+			"revision": "a90ea14ebebab48949ac0217104ad7a6b475cfa8",
+			"revisionTime": "2017-11-03T09:21:27Z"
 		},
 		{
 			"checksumSHA1": "HlDspvrfA33+zVOgm5mvoiWvRhg=",
@@ -335,6 +335,12 @@
 			"path": "github.com/spf13/viper",
 			"revision": "0967fc9aceab2ce9da34061253ac10fb99bba5b2",
 			"revisionTime": "2017-04-17T08:08:15Z"
+		},
+		{
+			"checksumSHA1": "J+ppEq6nYMKxhB9+c+MD1x9UwSc=",
+			"path": "github.com/stretchr/testify/assert",
+			"revision": "05e8a0eda380579888eb53c394909df027f06991",
+			"revisionTime": "2017-07-13T16:51:06Z"
 		},
 		{
 			"checksumSHA1": "UaN69OGz5qQyBGQLYn06Wjs/uUg=",
