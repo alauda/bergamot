@@ -1,0 +1,58 @@
+# Gopkg.toml example
+#
+# Refer to https://github.com/golang/dep/blob/master/docs/Gopkg.toml.md
+# for detailed Gopkg.toml documentation.
+#
+# required = ["github.com/user/thing/cmd/thing"]
+# ignored = ["github.com/user/project/pkgX", "bitbucket.org/user/project/pkgA/pkgY"]
+#
+# [[constraint]]
+#   name = "github.com/user/project"
+#   version = "1.0.0"
+#
+# [[constraint]]
+#   name = "github.com/user/project2"
+#   branch = "dev"
+#   source = "github.com/myfork/project2"
+#
+# [[override]]
+#   name = "github.com/x/y"
+#   version = "2.4.0"
+#
+# [prune]
+#   non-go = false
+#   go-tests = true
+#   unused-packages = true
+
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/alauda/go-redis-client"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/alauda/loggo"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/cockroachdb/cmux"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/juju/ansiterm"
+
+[[constraint]]
+  branch = "v1"
+  name = "gopkg.in/check.v1"
+
+[[constraint]]
+  name = "gopkg.in/doug-martin/goqu.v4"
+  version = "4.0.0"
+
+[[constraint]]
+  name = "gopkg.in/olivere/elastic.v3"
+  version = "3.0.69"
+
+[prune]
+  go-tests = true
+  unused-packages = true

@@ -39,7 +39,7 @@ logger, but have it emit all logging levels you need to do the following.
 	loggo.RegisterWriter("default", writer)
 
 To make loggo produce colored output, you can do the following,
-having imported github.com/alauda/bergamot/loggo/loggocolor:
+having imported github.com/alauda/loggo/loggocolor:
 
 	loggo.RemoveWriter("default")
 	loggo.RegisterWriter("default", loggocolorNewWriter(os.Stderr))

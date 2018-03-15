@@ -7,6 +7,7 @@ import (
 	"bytes"
 	"fmt"
 	"runtime"
+	"sort"
 	"time"
 )
 
@@ -161,20 +162,28 @@ func limitString(message string, size int, char rune) string {
 }
 
 func (logger Logger) generateStructured(message string, fields Fields) (format string, args []interface{}) {
-	var buf bytes.Buffer
-	if len(message) > 0 {
-		fields["msg"] = message
+	var (
+		buf    bytes.Buffer
+		index  = 0
+		keys   []string
+		keyIdx = 0
+	)
+	args = make([]interface{}, 1+len(fields)*2)
+	args[index] = message
+	index++
+	buf.WriteString("msg=\"%s\" ")
+	keys = make([]string, len(fields))
+	for k := range fields {
+		keys[keyIdx] = k
+		keyIdx++
 	}
-	args = make([]interface{}, len(fields)*2)
-	index := 0
-	for k, v := range fields {
-		buf.WriteString("%s")
+	sort.Strings(keys)
+
+	for _, k := range keys {
+		v := fields[k]
+		buf.WriteString("%s=\"%v\" ")
 		args[index] = k
 		index++
-
-		buf.WriteString("=")
-
-		buf.WriteString("\"%v\" ")
 		args[index] = v
 		index++
 	}

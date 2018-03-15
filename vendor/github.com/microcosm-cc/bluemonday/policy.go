@@ -47,8 +47,9 @@ type Policy struct {
 	// exceptions
 	initialized bool
 
-	// Allows the <!DOCTYPE > tag to exist in the sanitized document
-	allowDocType bool
+	// If true then we add spaces when stripping tags, specifically the closing
+	// tag is replaced by a space character.
+	addSpaces bool
 
 	// When true, add rel="nofollow" to HTML anchors
 	requireNoFollow bool
@@ -365,17 +366,19 @@ func (p *Policy) AllowURLSchemeWithCustomPolicy(
 	return p
 }
 
-// AllowDocType states whether the HTML sanitised by the sanitizer is allowed to
-// contain the HTML DocType tag: <!DOCTYPE HTML> or one of it's variants.
+// AddSpaceWhenStrippingTag states whether to add a single space " " when
+// removing tags that are not whitelisted by the policy.
 //
-// The HTML spec only permits one doctype per document, and as you know how you
-// are using the output of this, you know best as to whether we should ignore it
-// (default) or not.
+// This is useful if you expect to strip tags in dense markup and may lose the
+// value of whitespace.
 //
-// If you are sanitizing a HTML fragment the default (false) is fine.
-func (p *Policy) AllowDocType(allow bool) *Policy {
+// For example: "<p>Hello</p><p>World</p>"" would be sanitized to "HelloWorld"
+// with the default value of false, but you may wish to sanitize this to
+// " Hello  World " by setting AddSpaceWhenStrippingTag to true as this would
+// retain the intent of the text.
+func (p *Policy) AddSpaceWhenStrippingTag(allow bool) *Policy {
 
-	p.allowDocType = allow
+	p.addSpaces = allow
 
 	return p
 }
@@ -392,6 +395,19 @@ func (p *Policy) SkipElementsContent(names ...string) *Policy {
 		if _, ok := p.setOfElementsToSkipContent[element]; !ok {
 			p.setOfElementsToSkipContent[element] = struct{}{}
 		}
+	}
+
+	return p
+}
+
+// AllowElementsContent marks the HTML elements whose content should be
+// retained after removing the tag.
+func (p *Policy) AllowElementsContent(names ...string) *Policy {
+
+	p.init()
+
+	for _, element := range names {
+		delete(p.setOfElementsToSkipContent, strings.ToLower(element))
 	}
 
 	return p
@@ -417,6 +433,7 @@ func (p *Policy) addDefaultElementsWithoutAttrs() {
 	p.setOfElementsAllowedWithoutAttrs["button"] = struct{}{}
 	p.setOfElementsAllowedWithoutAttrs["canvas"] = struct{}{}
 	p.setOfElementsAllowedWithoutAttrs["caption"] = struct{}{}
+	p.setOfElementsAllowedWithoutAttrs["center"] = struct{}{}
 	p.setOfElementsAllowedWithoutAttrs["cite"] = struct{}{}
 	p.setOfElementsAllowedWithoutAttrs["code"] = struct{}{}
 	p.setOfElementsAllowedWithoutAttrs["col"] = struct{}{}
@@ -450,6 +467,7 @@ func (p *Policy) addDefaultElementsWithoutAttrs() {
 	p.setOfElementsAllowedWithoutAttrs["kbd"] = struct{}{}
 	p.setOfElementsAllowedWithoutAttrs["li"] = struct{}{}
 	p.setOfElementsAllowedWithoutAttrs["mark"] = struct{}{}
+	p.setOfElementsAllowedWithoutAttrs["marquee"] = struct{}{}
 	p.setOfElementsAllowedWithoutAttrs["nav"] = struct{}{}
 	p.setOfElementsAllowedWithoutAttrs["ol"] = struct{}{}
 	p.setOfElementsAllowedWithoutAttrs["optgroup"] = struct{}{}
@@ -462,6 +480,7 @@ func (p *Policy) addDefaultElementsWithoutAttrs() {
 	p.setOfElementsAllowedWithoutAttrs["ruby"] = struct{}{}
 	p.setOfElementsAllowedWithoutAttrs["s"] = struct{}{}
 	p.setOfElementsAllowedWithoutAttrs["samp"] = struct{}{}
+	p.setOfElementsAllowedWithoutAttrs["script"] = struct{}{}
 	p.setOfElementsAllowedWithoutAttrs["section"] = struct{}{}
 	p.setOfElementsAllowedWithoutAttrs["select"] = struct{}{}
 	p.setOfElementsAllowedWithoutAttrs["small"] = struct{}{}

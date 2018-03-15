@@ -112,9 +112,13 @@ func (p *Policy) sanitize(r io.Reader) *bytes.Buffer {
 		switch token.Type {
 		case html.DoctypeToken:
 
-			if p.allowDocType {
-				buff.WriteString(token.String())
-			}
+			// DocType is not handled as there is no safe parsing mechanism
+			// provided by golang.org/x/net/html for the content, and this can
+			// be misused to insert HTML tags that are not then sanitized
+			//
+			// One might wish to recursively sanitize here using the same policy
+			// but I will need to do some further testing before considering
+			// this.
 
 		case html.CommentToken:
 
@@ -130,6 +134,9 @@ func (p *Policy) sanitize(r io.Reader) *bytes.Buffer {
 					skipElementContent = true
 					skippingElementsCount++
 				}
+				if p.addSpaces {
+					buff.WriteString(" ")
+				}
 				break
 			}
 
@@ -141,6 +148,9 @@ func (p *Policy) sanitize(r io.Reader) *bytes.Buffer {
 				if !p.allowNoAttrs(token.Data) {
 					skipClosingTag = true
 					closingTagToSkipStack = append(closingTagToSkipStack, token.Data)
+					if p.addSpaces {
+						buff.WriteString(" ")
+					}
 					break
 				}
 			}
@@ -151,10 +161,17 @@ func (p *Policy) sanitize(r io.Reader) *bytes.Buffer {
 
 		case html.EndTagToken:
 
+			if mostRecentlyStartedToken == token.Data {
+				mostRecentlyStartedToken = ""
+			}
+
 			if skipClosingTag && closingTagToSkipStack[len(closingTagToSkipStack)-1] == token.Data {
 				closingTagToSkipStack = closingTagToSkipStack[:len(closingTagToSkipStack)-1]
 				if len(closingTagToSkipStack) == 0 {
 					skipClosingTag = false
+				}
+				if p.addSpaces {
+					buff.WriteString(" ")
 				}
 				break
 			}
@@ -165,6 +182,9 @@ func (p *Policy) sanitize(r io.Reader) *bytes.Buffer {
 					if skippingElementsCount == 0 {
 						skipElementContent = false
 					}
+				}
+				if p.addSpaces {
+					buff.WriteString(" ")
 				}
 				break
 			}
@@ -177,6 +197,9 @@ func (p *Policy) sanitize(r io.Reader) *bytes.Buffer {
 
 			aps, ok := p.elsAndAttrs[token.Data]
 			if !ok {
+				if p.addSpaces {
+					buff.WriteString(" ")
+				}
 				break
 			}
 
@@ -185,6 +208,9 @@ func (p *Policy) sanitize(r io.Reader) *bytes.Buffer {
 			}
 
 			if len(token.Attr) == 0 && !p.allowNoAttrs(token.Data) {
+				if p.addSpaces {
+					buff.WriteString(" ")
+				}
 				break
 			}
 
@@ -195,8 +221,8 @@ func (p *Policy) sanitize(r io.Reader) *bytes.Buffer {
 		case html.TextToken:
 
 			if !skipElementContent {
-				switch strings.ToLower(mostRecentlyStartedToken) {
-				case "javascript":
+				switch mostRecentlyStartedToken {
+				case "script":
 					// not encouraged, but if a policy allows JavaScript we
 					// should not HTML escape it as that would break the output
 					buff.WriteString(token.Data)
@@ -209,7 +235,6 @@ func (p *Policy) sanitize(r io.Reader) *bytes.Buffer {
 					buff.WriteString(token.String())
 				}
 			}
-
 		default:
 			// A token that didn't exist in the html package when we wrote this
 			return &bytes.Buffer{}
@@ -339,8 +364,10 @@ func (p *Policy) sanitizeAttrs(
 				}
 
 				if hrefFound {
-					var noFollowFound bool
-					var targetFound bool
+					var (
+						noFollowFound    bool
+						targetBlankFound bool
+					)
 
 					addNoFollow := (p.requireNoFollow ||
 						externalLink && p.requireNoFollowFullyQualifiedLinks)
@@ -357,36 +384,32 @@ func (p *Policy) sanitizeAttrs(
 							if strings.Contains(htmlAttr.Val, "nofollow") {
 								noFollowFound = true
 								tmpAttrs = append(tmpAttrs, htmlAttr)
+								appended = true
 							} else {
 								htmlAttr.Val += " nofollow"
 								noFollowFound = true
 								tmpAttrs = append(tmpAttrs, htmlAttr)
+								appended = true
 							}
-
-							appended = true
 						}
 
-						if elementName == "a" &&
-							htmlAttr.Key == "target" &&
-							addTargetBlank {
-
-							if strings.Contains(htmlAttr.Val, "_blank") {
-								targetFound = true
-								tmpAttrs = append(tmpAttrs, htmlAttr)
-							} else {
-								htmlAttr.Val = "_blank"
-								targetFound = true
-								tmpAttrs = append(tmpAttrs, htmlAttr)
+						if elementName == "a" && htmlAttr.Key == "target" {
+							if htmlAttr.Val == "_blank" {
+								targetBlankFound = true
 							}
-
-							appended = true
+							if addTargetBlank && !targetBlankFound {
+								htmlAttr.Val = "_blank"
+								targetBlankFound = true
+								tmpAttrs = append(tmpAttrs, htmlAttr)
+								appended = true
+							}
 						}
 
 						if !appended {
 							tmpAttrs = append(tmpAttrs, htmlAttr)
 						}
 					}
-					if noFollowFound || targetFound {
+					if noFollowFound || targetBlankFound {
 						cleanAttrs = tmpAttrs
 					}
 
@@ -397,11 +420,62 @@ func (p *Policy) sanitizeAttrs(
 						cleanAttrs = append(cleanAttrs, rel)
 					}
 
-					if elementName == "a" && addTargetBlank && !targetFound {
+					if elementName == "a" && addTargetBlank && !targetBlankFound {
 						rel := html.Attribute{}
 						rel.Key = "target"
 						rel.Val = "_blank"
+						targetBlankFound = true
 						cleanAttrs = append(cleanAttrs, rel)
+					}
+
+					if targetBlankFound {
+						// target="_blank" has a security risk that allows the
+						// opened window/tab to issue JavaScript calls against
+						// window.opener, which in effect allow the destination
+						// of the link to control the source:
+						// https://dev.to/ben/the-targetblank-vulnerability-by-example
+						//
+						// To mitigate this risk, we need to add a specific rel
+						// attribute if it is not already present.
+						// rel="noopener"
+						//
+						// Unfortunately this is processing the rel twice (we
+						// already looked at it earlier ^^) as we cannot be sure
+						// of the ordering of the href and rel, and whether we
+						// have fully satisfied that we need to do this. This
+						// double processing only happens *if* target="_blank"
+						// is true.
+						var noOpenerAdded bool
+						tmpAttrs := []html.Attribute{}
+						for _, htmlAttr := range cleanAttrs {
+							var appended bool
+							if htmlAttr.Key == "rel" {
+								if strings.Contains(htmlAttr.Val, "noopener") {
+									noOpenerAdded = true
+									tmpAttrs = append(tmpAttrs, htmlAttr)
+								} else {
+									htmlAttr.Val += " noopener"
+									noOpenerAdded = true
+									tmpAttrs = append(tmpAttrs, htmlAttr)
+								}
+
+								appended = true
+							}
+							if !appended {
+								tmpAttrs = append(tmpAttrs, htmlAttr)
+							}
+						}
+						if noOpenerAdded {
+							cleanAttrs = tmpAttrs
+						} else {
+							// rel attr was not found, or else noopener would
+							// have been added already
+							rel := html.Attribute{}
+							rel.Key = "rel"
+							rel.Val = "noopener"
+							cleanAttrs = append(cleanAttrs, rel)
+						}
+
 					}
 				}
 			default:
@@ -419,13 +493,18 @@ func (p *Policy) allowNoAttrs(elementName string) bool {
 
 func (p *Policy) validURL(rawurl string) (string, bool) {
 	if p.requireParseableURLs {
-		// URLs do not contain whitespace
-		if strings.Contains(rawurl, " ") ||
+		// URLs are valid if when space is trimmed the URL is valid
+		rawurl = strings.TrimSpace(rawurl)
+
+		// URLs cannot contain whitespace, unless it is a data-uri
+		if (strings.Contains(rawurl, " ") ||
 			strings.Contains(rawurl, "\t") ||
-			strings.Contains(rawurl, "\n") {
+			strings.Contains(rawurl, "\n")) &&
+			!strings.HasPrefix(rawurl, `data:`) {
 			return "", false
 		}
 
+		// URLs are valid if they parse
 		u, err := url.Parse(rawurl)
 		if err != nil {
 			return "", false
