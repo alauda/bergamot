@@ -16,7 +16,7 @@
   branch = "master"
   name = "github.com/alauda/go-redis-client"
   packages = ["."]
-  revision = "a90ea14ebebab48949ac0217104ad7a6b475cfa8"
+  revision = "77d2151d94bc29dc02edf407001fc57ba065bde3"
 
 [[projects]]
   branch = "master"
@@ -393,6 +393,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "11edd9da1a8df6d676a9e7fb4d556cda778281507172f351b66739f45d921045"
+  inputs-digest = "6a142e79e6638a850baef3b7825a1ccac530b128f8f258bf54e40cfde12ef8bb"
   solver-name = "gps-cdcl"
   solver-version = 1
