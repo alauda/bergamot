@@ -9,6 +9,9 @@ import (
 	aredis "github.com/alauda/go-redis-client"
 )
 
+// NilReply represent Redis nil reply, .e.g. when key does not exist.
+const NilReply = aredis.RedisNil
+
 type (
 	// RedisCache abstraction used to store a redis connection
 	RedisCache struct {
@@ -101,4 +104,9 @@ func (r *RedisCache) Diagnose() diagnose.ComponentReport {
 // GetAddr will return a string of the addres which is host:port
 func (r RedisOpts) GetAddr() string {
 	return fmt.Sprintf("%s:%d", r.Host, r.Port)
+}
+
+// IsCacheErr will ignore redis.nil for error handler
+func IsCacheErr(err error) bool {
+	return err != nil && err != NilReply
 }
