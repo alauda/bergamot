@@ -64,7 +64,6 @@ const (
 func SetLevel(level Level) {
 	var config string
 	switch level {
-
 	case LevelInfo:
 		config = "<root>=INFO"
 	case LevelError:
@@ -75,8 +74,8 @@ func SetLevel(level Level) {
 		fallthrough
 	default:
 		config = "<root>=TRACE"
-
 	}
+
 	loggo.ConfigureLoggers(config)
 }
 
