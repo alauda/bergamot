@@ -1,0 +1,17 @@
+{
+	"comment": "",
+	"ignore": "",
+	"package": [
+		{
+			"path": "github.com/parnurzeal/gorequest",
+			"revision": ""
+		},
+		{
+			"checksumSHA1": "OMAKAu5bUX4xb+i9F3jgl3Ndvog=",
+			"path": "github.com/stretchr/testify/assert",
+			"revision": "c679ae2cc0cb27ec3293fea7e254e47386f05d69",
+			"revisionTime": "2018-03-14T08:05:35Z"
+		}
+	],
+	"rootPath": "github.com/alauda/bergamot"
+}
