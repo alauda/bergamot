@@ -20,7 +20,7 @@ import(
     "fmt"
     "log"
 
-    "github.com/bergamot/sonarqube"
+    "github.com/bergamot/alauda/sonarqube"
 )
 
 func main() {
@@ -44,7 +44,7 @@ import(
     "fmt"
     "log"
 
-    "github.com/bergamot/sonarqube"
+    "github.com/bergamot/alauda/sonarqube"
 )
 
 func main() {
@@ -70,7 +70,7 @@ import(
     "fmt"
     "log"
 
-    "github.com/bergamot/sonarqube"
+    "github.com/bergamot/alauda/sonarqube"
 )
 
 func main() {
