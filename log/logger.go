@@ -39,6 +39,14 @@ type StLogger interface {
 	StTrace(message string, fields loggo.Fields)
 }
 
+// BasicLogger basic logger interface
+type BasicLogger interface {
+	Debugf(format string, args ...interface{})
+	Infof(format string, args ...interface{})
+	Warningf(format string, args ...interface{})
+	Errorf(format string, args ...interface{})
+}
+
 // Logger interface to define a logger entity
 type Logger interface {
 	StandardLogger
