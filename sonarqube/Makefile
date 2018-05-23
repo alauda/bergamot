@@ -1,6 +1,6 @@
 all: help
 
-test_sonar6:
+test:
 	go test -v -cover
 
 help:
