@@ -70,21 +70,21 @@ type SonarQube struct {
 }
 
 // NewSonarQube return sonarqube, retrive endpoint and token from env
-func NewSonarQube() *SonarQube {
+func NewSonarQube() (*SonarQube, error) {
 	endpoint := os.Getenv("SONAR_ENDPOINT")
 	token := os.Getenv("SONAR_TOKEN")
 	if len(endpoint) == 0 {
-		panic("NewSonarQube method need env SONAR_ENDPOINT, but missing")
+		return nil, fmt.Errorf("NewSonarQube method need env SONAR_ENDPOINT, but missing")
 	}
 	if len(token) == 0 {
-		panic("NewSonarQube method need env SONAR_TOKEN, but missing")
+		return nil, fmt.Errorf("NewSonarQube method need env SONAR_TOKEN, but missing")
 	}
 
 	return NewSonarQubeArgs(endpoint, token)
 }
 
 // NewSonarQubeArgs return sonarqube with args init
-func NewSonarQubeArgs(endpoint, token string) *SonarQube {
+func NewSonarQubeArgs(endpoint, token string) (*SonarQube, error) {
 	var sonar SonarQube
 	sonar.Endpoint = endpoint
 	sonar.Token = token
@@ -107,11 +107,11 @@ func NewSonarQubeArgs(endpoint, token string) *SonarQube {
 	version, err := sonar.GetVersion()
 	if err != nil {
 		sonar.Logger.Errorf("[NewSonarQubeArgs] - get sonar version error: %s", err)
-		panic(err)
+		return nil, err
 	}
 	sonar.Version = version
 
-	return &sonar
+	return &sonar, nil
 }
 
 // SetLogger set logger to sonar default logger
@@ -345,6 +345,25 @@ func (sonar *SonarQube) SetSettings(
 	resp, _, errs := sonar.httpClient.Post(path)
 	if errs != nil {
 		err = fmt.Errorf("[GetSettings] - set component settings error: %v", errs)
+		sonar.Logger.Errorf("%v", err)
+		return nil, err
+	}
+	defer utils.CloseResponse(resp)
+
+	return sonar.parseResponse(resp)
+}
+
+// ListLanguages list sonar languages
+func (sonar *SonarQube) ListLanguages() (interface{}, error) {
+	path, err := utils.GetURL(sonar.Endpoint, "api/languages/list", nil)
+	if err != nil {
+		sonar.Logger.Errorf("[GetURL] - encount error: %v", err)
+		return nil, err
+	}
+
+	resp, _, errs := sonar.httpClient.Get(path)
+	if errs != nil {
+		err = fmt.Errorf("[GetSettings] - get languages error: %v", errs)
 		sonar.Logger.Errorf("%v", err)
 		return nil, err
 	}
