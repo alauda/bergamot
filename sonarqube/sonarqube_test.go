@@ -40,7 +40,12 @@ func getSonar(t *testing.T) *sonarqube.SonarQube {
 		t.Skipf("env endpoint %s or token %s is missing, skip test", endpoint, token)
 	}
 
-	return sonarqube.NewSonarQubeArgs(endpoint, token)
+	sonar, err := sonarqube.NewSonarQubeArgs(endpoint, token)
+	if err != nil {
+		t.Errorf("new Sonarqube error: %v", err)
+	}
+
+	return sonar
 }
 
 func TestNewSonarQubeArgs(t *testing.T) {
@@ -49,7 +54,8 @@ func TestNewSonarQubeArgs(t *testing.T) {
 		t.Skipf("env endpoint %s or token %s is missing", endpoint, token)
 	}
 
-	sonar := sonarqube.NewSonarQubeArgs(endpoint, token)
+	sonar, err := sonarqube.NewSonarQubeArgs(endpoint, token)
+	assert.Equal(t, err, nil)
 	assert.NotEmpty(t, sonar.Version)
 	t.Logf("sonar version is %s", sonar.Version)
 }
@@ -79,6 +85,15 @@ func TestSonarQube_CreateProject(t *testing.T) {
 
 	err := sonar.CreateProject(name, projectKey)
 	t.Logf("err of CreateProject is: %v", err)
+}
+
+func TestSonarQube_ListLanguages(t *testing.T) {
+	sonar := getSonar(t)
+	ret, err := sonar.ListLanguages()
+
+	assert.Nil(t, err)
+	assert.NotNil(t, ret)
+	t.Logf("languages of sonar are: %v", ret)
 }
 
 func TestSonarQube_ListQualityGates(t *testing.T) {
