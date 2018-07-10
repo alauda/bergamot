@@ -422,6 +422,116 @@ func (sonar *SonarQube) SelectQualityGates(gateID int, projectID, projectKey str
 	return sonar.parseResponse(resp)
 }
 
+// GetQualityGatesProjectStatusData
+func (sonar *SonarQube) GetQualityGatesProjectStatusData(analysisId, projectId, projectKey string) (interface{}, error) {
+	var query = url.Values{}
+	if analysisId != "" {
+		query.Add("analysisId", analysisId)
+	} else if projectId != "" {
+		query.Add("projectId", projectId)
+	} else if projectKey != "" {
+		query.Add("projectKey", projectKey)
+	} else {
+		return nil, fmt.Errorf("One (and only one) of the following parameters must be provided 'analysisId', 'projectId', 'projectKey'")
+	}
+
+	path, err := utils.GetURL(sonar.Endpoint, "api/qualitygates/project_status", query)
+	if err != nil {
+		sonar.Logger.Errorf("[GetURL] - encount error: %v", err)
+		return nil, err
+	}
+
+	resp, _, errs := sonar.httpClient.Get(path)
+	if errs != nil {
+		err = fmt.Errorf("[GetSettings] - get qualitygates project status error: %v", errs)
+		sonar.Logger.Errorf("%v", err)
+		return nil, err
+	}
+	defer utils.CloseResponse(resp)
+
+	return sonar.parseResponse(resp)
+}
+
+// GetQualityGatesProjectStatus
+func (sonar *SonarQube) GetQualityGatesProjectStatus(analysisId, projectId, projectKey string) (string, error) {
+	projectStatus, err := sonar.GetQualityGatesProjectStatusData(analysisId, projectId, projectKey)
+	if err != nil {
+		return "", err
+	}
+
+	// parse project status data
+	projectStatusMap, ok := projectStatus.(map[string]interface{})
+	if !ok {
+		return "", fmt.Errorf("project status %v is invalid", projectStatus)
+	}
+	projectData, ok := projectStatusMap["projectStatus"]
+	if !ok {
+		return "", fmt.Errorf("project status %v does not have key projectStatus", projectStatus)
+	}
+
+	projectDataMap, ok := projectData.(map[string]interface{})
+	if !ok {
+		return "", fmt.Errorf("project status data %v is invalid", projectData)
+	}
+	status, ok := projectDataMap["status"]
+	if !ok {
+		return "", fmt.Errorf("project status %v does not have key status", projectDataMap)
+	}
+
+	return fmt.Sprint(status), nil
+}
+
+// GetAnalysisTask
+func (sonar *SonarQube) GetAnalysisTask(ceTaskID string) (interface{}, error) {
+	var query = url.Values{
+		"id": []string{fmt.Sprint(ceTaskID)},
+	}
+
+	path, err := utils.GetURL(sonar.Endpoint, "api/ce/task", query)
+	if err != nil {
+		sonar.Logger.Errorf("[GetURL] - encount error: %v", err)
+		return nil, err
+	}
+
+	resp, _, errs := sonar.httpClient.Get(path)
+	if errs != nil {
+		err = fmt.Errorf("[GetSettings] - get analysis task %s error: %v", ceTaskID, errs)
+		sonar.Logger.Errorf("%v", err)
+		return nil, err
+	}
+	defer utils.CloseResponse(resp)
+
+	return sonar.parseResponse(resp)
+}
+
+// GetAnalysisTaskStatus get status of task
+func (sonar *SonarQube) GetAnalysisTaskStatus(ceTaskID string) (string, error) {
+	tasks, err := sonar.GetAnalysisTask(ceTaskID)
+	if err != nil {
+		return "", err
+	}
+	// tasks is map[task:map[status:SUCCES,...,]]
+	tasksMap, ok := tasks.(map[string]interface{})
+	if !ok {
+		return "", fmt.Errorf("task status %v is invalid", tasks)
+	}
+	task, ok := tasksMap["task"]
+	if !ok {
+		return "", fmt.Errorf("has no task of %s", ceTaskID)
+	}
+
+	taskMap, ok := task.(map[string]interface{})
+	if !ok {
+		return "", fmt.Errorf("task status %v is invalid", task)
+	}
+	status, ok := taskMap["status"]
+	if !ok {
+		return "", fmt.Errorf("task %s has no status", ceTaskID)
+	}
+
+	return fmt.Sprintf("%s", status), nil
+}
+
 func (sonar *SonarQube) parseResponse(resp *http.Response) (interface{}, error) {
 	if resp == nil {
 		return nil, fmt.Errorf("response is nil, skip encode")

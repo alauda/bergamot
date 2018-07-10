@@ -116,6 +116,30 @@ func TestSonarQube_SelectQualityGates(t *testing.T) {
 	t.Logf("err of SelectQualityGates is: %v", err)
 }
 
+func TestSonarQube_GetQualityGatesProjectStatusData(t *testing.T) {
+	t.Skip("need analysisId or projectId or projectKey")
+	sonar := getSonar(t)
+	analysisId := "AWSCwIISdW2Esay5WZC2"
+	projectId := ""
+	projectKey := ""
+
+	ret, err := sonar.GetQualityGatesProjectStatusData(analysisId, projectId, projectKey)
+	t.Logf("response body of SelectQualityGates is: %v", ret)
+	t.Logf("err of SelectQualityGates is: %v", err)
+}
+
+func TestSonarQube_GetQualityGatesProjectStatus(t *testing.T) {
+	t.Skip("need analysisId or projectId or projectKey")
+	sonar := getSonar(t)
+	analysisId := "AWSCwIISdW2Esay5WZC2"
+	projectId := ""
+	projectKey := ""
+
+	ret, err := sonar.GetQualityGatesProjectStatus(analysisId, projectId, projectKey)
+	t.Logf("response body of SelectQualityGates is: %v", ret)
+	t.Logf("err of SelectQualityGates is: %v", err)
+}
+
 func TestSonarQube_GetSettings(t *testing.T) {
 	sonar := getSonar(t)
 	component := "sonar-test-key"
@@ -144,6 +168,26 @@ func TestSonarQube_GetProjectID(t *testing.T) {
 	sonar := getSonar(t)
 	key := "sonar-key"
 	ret, err := sonar.GetProjectID(key)
+
+	t.Logf("err is %v", err)
+	t.Logf("ret is %v", ret)
+}
+
+func TestSonarQube_GetAnalysisTask(t *testing.T) {
+	t.Skip("need task id")
+	sonar := getSonar(t)
+	taskID := "AWR-rnuXELrk8W1dtIpm"
+	ret, err := sonar.GetAnalysisTask(taskID)
+
+	t.Logf("err is %v", err)
+	t.Logf("ret is %v", ret)
+}
+
+func TestSonarQube_GetAnalysisTaskStatus(t *testing.T) {
+	t.Skip("need task id")
+	sonar := getSonar(t)
+	taskID := "AWR-rnuXELrk8W1dtIpm"
+	ret, err := sonar.GetAnalysisTaskStatus(taskID)
 
 	t.Logf("err is %v", err)
 	t.Logf("ret is %v", ret)
