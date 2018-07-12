@@ -1,16 +1,14 @@
 package cmd
 
 import (
-	"bufio"
 	"fmt"
-	"io"
 	"log"
 	"os"
 	"path/filepath"
-	"strings"
 	"time"
 
 	"github.com/alauda/bergamot/sonarqube"
+	"github.com/alauda/bergamot/sonarqube/cmdclient/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -41,12 +39,13 @@ const (
 	ExitCodeQualityGateError   int = 133
 	ExitCodeQualityGateWarn    int = 134
 	ExitCodeQualityGateUnknown int = 135
+	ExitCodeNeedMoreInfo       int = 136
 )
 
 func monitorTask(cmd *cobra.Command, args []string) {
 	sonar, err := sonarqube.NewSonarQubeArgs(sonarHost, sonarToken)
 	if err != nil {
-		log.Printf("new sonarqube error: %v", err)
+		log.Printf("init sonarqube error: %v", err)
 		os.Exit(ExitCodeProgramError)
 	}
 
@@ -144,7 +143,6 @@ if want treat warn as fail, use --warn flag`, projectKey)
 }
 
 var (
-	workDir         string
 	ceTaskID        string
 	warn            bool
 	monitorTimeout  time.Duration
@@ -152,7 +150,6 @@ var (
 )
 
 func init() {
-	taskMonitorCmd.Flags().StringVar(&workDir, "w", "./", "sonar scanner workder")
 	taskMonitorCmd.Flags().StringVar(&ceTaskID, "id", "", "sonar analysis task id")
 	taskMonitorCmd.Flags().BoolVar(&warn, "warn", false, "whether set analysis status 'warn' to error")
 	taskMonitorCmd.Flags().DurationVar(&monitorTimeout, "t", time.Minute*time.Duration(30), "sonar analysis timeout")
@@ -169,47 +166,6 @@ func getTaskID(taskData map[string]string) (string, error) {
 }
 
 func collectTaskData(workDir string) (map[string]string, error) {
-	taskData := make(map[string]string, 6)
 	taskDataFilePath := filepath.Join(workDir, ".scannerwork/report-task.txt")
-	_, err := os.Stat(taskDataFilePath)
-	if os.IsNotExist(err) {
-		return nil, fmt.Errorf("Not found task data file %s", taskDataFilePath)
-	}
-
-	file, err := os.Open(taskDataFilePath)
-	if err != nil {
-		return nil, fmt.Errorf("Open %s error : ", err.Error())
-	}
-	defer file.Close()
-	r := bufio.NewReader(file)
-	taskData, err = parseLineData(r)
-	if err != nil {
-		return nil, fmt.Errorf("Parse Task Data Error： %s", err.Error())
-	}
-	return taskData, nil
-}
-
-func parseLineData(r *bufio.Reader) (map[string]string, error) {
-	data := map[string]string{}
-	for {
-		line, err := r.ReadString('\n')
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			return data, fmt.Errorf("parse line data: %s error : %s", line, err.Error())
-		}
-		line = strings.TrimRight(line, "\n")
-		if strings.TrimSpace(line) == "" {
-			continue
-		}
-		line = strings.TrimRight(line, "=")
-		index := strings.Index(line, "=")
-		if index == -1 {
-			data[line] = ""
-		} else {
-			data[line[0:index]] = line[index+1:]
-		}
-	}
-	return data, nil
+	return utils.ParseConfigContent(taskDataFilePath)
 }
