@@ -24,12 +24,14 @@ func Execute() {
 }
 
 var (
+	workDir    string
 	sonarHost  string
 	sonarToken string
 )
 
 func init() {
 	RootCmd.AddCommand(taskMonitorCmd)
+	taskMonitorCmd.Flags().StringVar(&workDir, "w", "./", "sonar scanner work directory")
 	RootCmd.PersistentFlags().StringVar(&sonarHost, "host", "localhost:9000", "sonarqube server url")
 	RootCmd.PersistentFlags().StringVar(&sonarToken, "token", "", "sonarqube api token")
 }

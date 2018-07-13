@@ -42,7 +42,7 @@ func getSonar(t *testing.T) *sonarqube.SonarQube {
 
 	sonar, err := sonarqube.NewSonarQubeArgs(endpoint, token)
 	if err != nil {
-		t.Errorf("new Sonarqube error: %v", err)
+		t.Errorf("init sonarqube error: %v", err)
 	}
 
 	return sonar
