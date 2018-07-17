@@ -38,8 +38,11 @@ Global Flags:
 ```
 demo usage:
 ```
-cmdclient --host sonar_host --token sonar_token --w /sonar_work/
+cmdclient --host sonar_host --token sonar_token --w /sonar_work/ --i 6s --t 20m
 ```
+`--i` and `--t` are duration type, the value are like: 6s, 2h, 20m...
+ 
+`--warn` means that if project status is **WARN**, it is marked error.
 ### qualitygate subcommand
 `qualitygate` provides `select` command.Help information are:
 ```
