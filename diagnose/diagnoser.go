@@ -136,6 +136,13 @@ func (c *ComponentReport) AddLatency(start time.Time) {
 
 // MarshalJSON custom json formater
 func (c *ComponentReport) MarshalJSON() ([]byte, error) {
+	// fmt.Sprintf("%.fms ", c.Latency.Seconds()/1000)
+	latency := c.Latency.String()
+	if c.Latency < time.Millisecond {
+		// converting to miliseconds
+		value := float64(c.Latency) / float64(time.Millisecond)
+		latency = fmt.Sprintf("%.2fms", value)
+	}
 	return json.Marshal(struct {
 		Status     HealthStatus `json:"status"`
 		Name       string       `json:"name"`
@@ -147,6 +154,8 @@ func (c *ComponentReport) MarshalJSON() ([]byte, error) {
 		c.Name,
 		c.Message,
 		c.Suggestion,
-		c.Latency.String(),
+		latency,
+		// c.Latency.String(),
 	})
+	// time.Second
 }
