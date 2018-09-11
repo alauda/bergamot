@@ -101,6 +101,7 @@ func (h *Server) Init() *Server {
 		// adding health check
 		h.iris.Any("/", h.Healthcheck)
 		h.iris.Any("/_ping", h.Healthcheck)
+		h.iris.Any("/_auth_ping", h.AuthHealthcheck)
 	}
 
 	if h.config.AddLog && h.config.LogFunc != nil {
@@ -152,6 +153,19 @@ func (h *Server) AddVersionEndpointFunc(version int, relativePath string, addRou
 // Healthcheck healthcheck endpoint
 func (h *Server) Healthcheck(ctx *iris.Context) {
 	ctx.WriteString(fmt.Sprintf("%s:%s", h.config.Component, time.Since(h.start)))
+}
+
+// AuthHealthcheck healthcheck endpoint
+func (h *Server) AuthHealthcheck(ctx *iris.Context) {
+	token := ctx.Request.Header.Get("Authorization")
+
+	if token == "" {
+		ctx.SetStatusCode(iris.StatusUnauthorized)
+		ctx.WriteString(fmt.Sprintf("%s. You Unauthorized.", h.config.Component))
+	} else {
+		ctx.WriteString(fmt.Sprintf("%s. Your Authorization %v.", h.config.Component, token))
+	}
+
 }
 
 // GetApp returns the iris app, used for testing
