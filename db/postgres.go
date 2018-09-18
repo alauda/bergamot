@@ -3,6 +3,7 @@ package db
 import (
 	"database/sql"
 	"fmt"
+	"time"
 
 	_ "github.com/lib/pq"
 )
@@ -18,6 +19,7 @@ func NewPostgresHandler(options DatabaseConnectionOpts) (*sql.DB, error) {
 	}
 	db.SetMaxOpenConns(psqlOpts.MaxConnections)
 	db.SetMaxIdleConns(psqlOpts.MaxIdleConnections)
+	db.SetConnMaxLifetime(time.Duration(psqlOpts.ConnMaxLifetime) * time.Second)
 	err = db.Ping()
 	if err != nil {
 		return nil, err
