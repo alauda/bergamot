@@ -3,6 +3,7 @@ package db
 import (
 	"database/sql"
 	"fmt"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -17,6 +18,7 @@ func NewMySQLHandler(options DatabaseConnectionOpts) (*sql.DB, error) {
 	}
 	db.SetMaxOpenConns(options.MaxConnections)
 	db.SetMaxIdleConns(options.MaxIdleConnections)
+	db.SetConnMaxLifetime(time.Duration(options.ConnMaxLifetime) * time.Second)
 	err = db.Ping()
 	if err != nil {
 		return nil, err

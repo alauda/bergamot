@@ -58,11 +58,12 @@ type DatabaseConnectionOpts struct {
 	Timeout            int
 	MaxConnections     int
 	MaxIdleConnections int
+	ConnMaxLifetime    int
 	Params             map[string]string
 }
 
 // NewDatabaseConnectionOpts constructor function for DatabaseConnectionOpts
-func NewDatabaseConnectionOpts(host, database, user, password, port string, timeout, maxConn, maxIdleConn int) *DatabaseConnectionOpts {
+func NewDatabaseConnectionOpts(host, database, user, password, port string, timeout, maxConn, maxIdleConn, connMaxLifetime int) *DatabaseConnectionOpts {
 	return &DatabaseConnectionOpts{
 		Host:               host,
 		Database:           database,
@@ -72,6 +73,7 @@ func NewDatabaseConnectionOpts(host, database, user, password, port string, time
 		Timeout:            timeout,
 		MaxConnections:     maxConn,
 		MaxIdleConnections: maxIdleConn,
+		ConnMaxLifetime:    connMaxLifetime,
 	}
 }
 
