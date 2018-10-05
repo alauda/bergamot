@@ -5,6 +5,7 @@ VERSION = 0.0.1
 CURDIR = $(shell pwd)
 SOURCEDIR = $(CURDIR)
 COVER = $($3)
+PACKAGES=$(shell go list ./...)
 
 ECHO = echo
 RM = rm -rf
@@ -35,7 +36,7 @@ add:
 all: build
 
 build:
-	go build -ldflags "-w -s" -v -o bergamot github.com/alauda/bergamot
+	go build -ldflags "-w -s" -v ${PACKAGES}
 
 help:
 	@$(ECHO) "Targets:"
