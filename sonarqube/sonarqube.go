@@ -528,7 +528,7 @@ func (sonar *SonarQube) GetAnalysisTaskDetails(ceTaskID string) (details Analysi
 	}
 	task, ok := tasksMap["task"]
 	if !ok {
-		err = fmt.Errorf("has no task of %s", ceTaskID)
+		err = fmt.Errorf("reponse is %#v and has no task of %s", tasksMap, ceTaskID)
 		return
 	}
 
