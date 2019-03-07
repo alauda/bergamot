@@ -70,20 +70,20 @@ func monitorTask(cmd *cobra.Command, args []string) {
 	}
 
 	errCh := make(chan error)
-	successCh := make(chan struct{})
+	successCh := make(chan sonarqube.AnalysisTaskDetails)
 
-	go func(successCh chan struct{}, errCh chan error, sonar *sonarqube.SonarQube, taskID string) {
+	go func(successCh chan sonarqube.AnalysisTaskDetails, errCh chan error, sonar *sonarqube.SonarQube, taskID string) {
 		stop := false
 		for !stop {
-			status, err := sonar.GetAnalysisTaskStatus(taskID)
+			taskDetails, err := sonar.GetAnalysisTaskDetails(taskID)
 			if err != nil {
 				errCh <- err
 				break
 			}
 
-			switch status {
+			switch taskDetails.Status {
 			case TaskStatusSuccess:
-				successCh <- struct{}{}
+				successCh <- taskDetails
 				stop = true
 			case TaskStatusFailed:
 				sonar.Logger.Errorf("task %s is failed", taskID)
@@ -91,11 +91,11 @@ func monitorTask(cmd *cobra.Command, args []string) {
 				stop = true
 			case TaskStatusCanceled:
 				sonar.Logger.Errorf("task %s is canceled", taskID)
-				successCh <- struct{}{}
+				successCh <- taskDetails
 				stop = true
 			default:
 				sonar.Logger.Debugf("task %s status is %s, will sleep %d seconds and try again",
-					taskID, status, monitorInterval/time.Second)
+					taskID, taskDetails.Status, monitorInterval/time.Second)
 				time.Sleep(monitorInterval)
 			}
 		}
@@ -108,14 +108,14 @@ func monitorTask(cmd *cobra.Command, args []string) {
 	case err := <-errCh:
 		sonar.Logger.Errorf("monitor task %s error: %v", ceTaskID, err)
 		os.Exit(ExitCodeProgramError)
-	case <-successCh:
+	case analysisTaskDetails := <-successCh:
 		sonar.Logger.Infof("task of id %s is success, begin checking project analysis status...", ceTaskID)
 		projectKey, ok := taskData["projectKey"]
 		if !ok {
 			sonar.Logger.Errorf("task data does not have projectKey")
 			os.Exit(ExitCodeProgramError)
 		}
-		projectStatus, err := sonar.GetQualityGatesProjectStatus("", "", projectKey)
+		projectStatus, err := sonar.GetQualityGatesProjectStatus(analysisTaskDetails.AnalysisId, "", projectKey)
 		if err != nil {
 			sonar.Logger.Errorf("get quality gates project status error: %v", err)
 			os.Exit(ExitCodeProgramError)

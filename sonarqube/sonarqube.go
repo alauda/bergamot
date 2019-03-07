@@ -504,32 +504,49 @@ func (sonar *SonarQube) GetAnalysisTask(ceTaskID string) (interface{}, error) {
 	return sonar.parseResponse(resp)
 }
 
-// GetAnalysisTaskStatus get status of task
-func (sonar *SonarQube) GetAnalysisTaskStatus(ceTaskID string) (string, error) {
+type AnalysisTaskDetails struct {
+	AnalysisId    string `json:"analysisId"`
+	ComponentKey  string `json:"componentKey"`
+	ComponentName string `json:"componentName"`
+	// branch is available after SonarQube 6.6
+	Branch       string `json:"branch,omitempty"`
+	Status       string `json:"status"`
+	ErrorMessage string `json:"errorMessage,omitempty"`
+}
+
+// GetAnalysisTaskDetails get status of task
+func (sonar *SonarQube) GetAnalysisTaskDetails(ceTaskID string) (details AnalysisTaskDetails, err error) {
 	tasks, err := sonar.GetAnalysisTask(ceTaskID)
 	if err != nil {
-		return "", err
+		return
 	}
 	// tasks is map[task:map[status:SUCCES,...,]]
 	tasksMap, ok := tasks.(map[string]interface{})
 	if !ok {
-		return "", fmt.Errorf("task status %v is invalid", tasks)
+		err = fmt.Errorf("task status %v is invalid", tasks)
+		return
 	}
 	task, ok := tasksMap["task"]
 	if !ok {
-		return "", fmt.Errorf("has no task of %s", ceTaskID)
+		err = fmt.Errorf("has no task of %s", ceTaskID)
+		return
 	}
 
-	taskMap, ok := task.(map[string]interface{})
-	if !ok {
-		return "", fmt.Errorf("task status %v is invalid", task)
-	}
-	status, ok := taskMap["status"]
-	if !ok {
-		return "", fmt.Errorf("task %s has no status", ceTaskID)
+	return sonar.convertUnparsedTaskToTaskDetails(task)
+}
+
+func (sonar *SonarQube) convertUnparsedTaskToTaskDetails(task interface{}) (details AnalysisTaskDetails, err error ){
+	taskByteData, err := json.Marshal(task)
+	if err != nil {
+		return
 	}
 
-	return fmt.Sprintf("%s", status), nil
+	err = json.Unmarshal(taskByteData, &details)
+	if err != nil {
+		return
+	}
+
+	return
 }
 
 func (sonar *SonarQube) parseResponse(resp *http.Response) (interface{}, error) {

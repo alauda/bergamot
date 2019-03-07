@@ -1,4 +1,4 @@
-package sonarqube_test
+package sonarqube
 
 import (
 	"encoding/json"
@@ -6,7 +6,6 @@ import (
 	"os"
 	"testing"
 
-	"github.com/alauda/bergamot/sonarqube"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -34,13 +33,13 @@ func getSonarEnv() (string, string, bool) {
 	return endpoint, token, true
 }
 
-func getSonar(t *testing.T) *sonarqube.SonarQube {
+func getSonar(t *testing.T) *SonarQube {
 	endpoint, token, valid := getSonarEnv()
 	if !valid {
 		t.Skipf("env endpoint %s or token %s is missing, skip test", endpoint, token)
 	}
 
-	sonar, err := sonarqube.NewSonarQubeArgs(endpoint, token)
+	sonar, err := NewSonarQubeArgs(endpoint, token)
 	if err != nil {
 		t.Errorf("init sonarqube error: %v", err)
 	}
@@ -54,7 +53,7 @@ func TestNewSonarQubeArgs(t *testing.T) {
 		t.Skipf("env endpoint %s or token %s is missing", endpoint, token)
 	}
 
-	sonar, err := sonarqube.NewSonarQubeArgs(endpoint, token)
+	sonar, err := NewSonarQubeArgs(endpoint, token)
 	assert.Equal(t, err, nil)
 	assert.NotEmpty(t, sonar.Version)
 	t.Logf("sonar version is %s", sonar.Version)
@@ -187,8 +186,55 @@ func TestSonarQube_GetAnalysisTaskStatus(t *testing.T) {
 	t.Skip("need task id")
 	sonar := getSonar(t)
 	taskID := "AWR-rnuXELrk8W1dtIpm"
-	ret, err := sonar.GetAnalysisTaskStatus(taskID)
+	taskDetails, err := sonar.GetAnalysisTaskDetails(taskID)
 
 	t.Logf("err is %v", err)
-	t.Logf("ret is %v", ret)
+	t.Logf("taskDetails is %v", taskDetails)
 }
+
+func TestSonarQube_convertUnparsedTaskToDetails(t *testing.T) {
+	sonar := SonarQube{}
+	mockResponse := `{
+  "task": {
+    "organization": "my-org-1",
+    "id": "AVAn5RKqYwETbXvgas-I",
+    "type": "REPORT",
+    "componentId": "AVAn5RJmYwETbXvgas-H",
+    "componentKey": "project_1",
+    "componentName": "Project One",
+    "componentQualifier": "TRK",
+    "analysisId": "123456",
+    "status": "FAILED",
+    "submittedAt": "2015-10-02T11:32:15+0200",
+    "startedAt": "2015-10-02T11:32:16+0200",
+    "executedAt": "2015-10-02T11:32:22+0200",
+    "executionTimeMs": 5286,
+    "errorMessage": "Fail to extract report AVaXuGAi_te3Ldc_YItm from database",
+    "logs": false,
+    "hasErrorStacktrace": true,
+    "errorStacktrace": "java.lang.IllegalStateException: Fail to extract report AVaXuGAi_te3Ldc_YItm from database\n\tat org.sonar.server.computation.task.projectanalysis.step.ExtractReportStep.execute(ExtractReportStep.java:50)",
+    "scannerContext": "SonarQube plugins:\n\t- Git 1.0 (scmgit)\n\t- Java 3.13.1 (java)",
+    "hasScannerContext": true
+  }
+}`
+	var responseBlob interface{}
+	err := json.Unmarshal([]byte(mockResponse), &responseBlob)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	tasks := responseBlob.(map[string]interface{})
+	task := tasks["task"]
+
+	analysisTaskDetails, err := sonar.convertUnparsedTaskToTaskDetails(task)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	assert.Equal(t, analysisTaskDetails.Status, "FAILED")
+	assert.Equal(t, analysisTaskDetails.AnalysisId, "123456")
+	assert.Equal(t, analysisTaskDetails.Branch, "")
+}
+
